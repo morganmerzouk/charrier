@@ -57,7 +57,6 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   onCacheDrawing(drawing) {
-    console.log("ets");
     dispatch(cacheDrawing(drawing));
   },
 

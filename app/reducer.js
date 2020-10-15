@@ -3,10 +3,9 @@ import {getPopularImages} from 'utils/unsplash';
 const images = getPopularImages();
 
 const initialState = {
-  filter: 'light_contrast',
   availableImages: [],
   selectedImage: null,
-  query: "",
+  logo: null,
   drawing: null,
   size: 'square',
   text: 'Exemple de texte',
@@ -47,6 +46,8 @@ export default function(state = initialState, action) {
       return Object.assign({}, state, { filter: action.filter });
     case 'SELECT_IMAGE':
       return Object.assign({}, state, { selectedImage: action.image });
+    case 'UPLOAD_LOGO':
+      return Object.assign({}, state, { logo: action.logo });
     case 'SET_SIZE':
       return Object.assign({}, state, { size: action.size });
     case 'SET_TEXT':
@@ -65,8 +66,6 @@ export default function(state = initialState, action) {
       return Object.assign({}, state, { drawing: action.drawing });
     case 'RECEIVE_IMAGES':
       return Object.assign({}, state, { availableImages: action.images });
-    case 'SET_QUERY':
-      return Object.assign({}, state, { query: action.query });
     default:
       return state;
   }

@@ -74477,7 +74477,7 @@ require.register("actions.js", function(exports, require, module) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.cacheDrawing = exports.setNoEditing = exports.setNoFocus = exports.setEditing = exports.setFocus = exports.setTextRect = exports.setText = exports.setSize = exports.selectImage = exports.setFilter = exports.setColor = exports.setItalic = exports.setBold = exports.setFontSize = exports.setFont = void 0;
+exports.cacheDrawing = exports.setNoEditing = exports.setNoFocus = exports.setEditing = exports.setFocus = exports.setTextRect = exports.setText = exports.setSize = exports.uploadLogo = exports.selectImage = exports.setFilter = exports.setColor = exports.setItalic = exports.setBold = exports.setFontSize = exports.setFont = void 0;
 
 var setFont = function setFont(font) {
   return {
@@ -74541,6 +74541,15 @@ var selectImage = function selectImage(image) {
 };
 
 exports.selectImage = selectImage;
+
+var uploadLogo = function uploadLogo(logo) {
+  return {
+    type: 'UPLOAD_LOGO',
+    logo: logo
+  };
+};
+
+exports.uploadLogo = uploadLogo;
 
 var setSize = function setSize(size) {
   return {
@@ -74738,6 +74747,8 @@ var _react = _interopRequireDefault(require("react"));
 
 var _reactDom = _interopRequireDefault(require("react-dom"));
 
+var _reactRedux = require("react-redux");
+
 var _reactKonva = require("react-konva");
 
 var _Spinner = _interopRequireDefault(require("./Spinner"));
@@ -74749,6 +74760,8 @@ var _computeImageDimensions = _interopRequireDefault(require("./computeImageDime
 var _useImage3 = _interopRequireDefault(require("use-image"));
 
 var _Portal = _interopRequireDefault(require("./Portal"));
+
+var _Upload = _interopRequireDefault(require("components/Upload"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -74799,43 +74812,156 @@ var MyImage = function MyImage(image) {
   });
 };
 
-var ImageCanvas = /*#__PURE__*/function (_React$Component) {
-  _inherits(ImageCanvas, _React$Component);
+var URLImage = /*#__PURE__*/function (_React$Component) {
+  _inherits(URLImage, _React$Component);
 
-  var _super = _createSuper(ImageCanvas);
+  var _super = _createSuper(URLImage);
 
-  function ImageCanvas(props) {
+  _createClass(URLImage, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.loadImage();
+      this.trRef.current.nodes([this.shapeRef.current]);
+      this.trRef.current.getLayer().batchDraw();
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(oldProps) {
+      if (oldProps.src !== this.props.src) {
+        this.loadImage();
+        this.trRef.current.nodes([this.shapeRef.current]);
+        this.trRef.current.getLayer().batchDraw();
+      }
+    }
+  }]);
+
+  function URLImage(props) {
     var _this;
 
-    _classCallCheck(this, ImageCanvas);
+    _classCallCheck(this, URLImage);
 
     _this = _super.call(this, props);
 
-    _defineProperty(_assertThisInitialized(_this), "handleTextEdit", function (e) {
+    _defineProperty(_assertThisInitialized(_this), "state", {
+      image: null,
+      width: null,
+      height: null
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleLoad", function () {
+      // after setState react-konva will update canvas and redraw the layer
+      // because "image" property is changed
+      _this.setState({
+        image: _this.image
+      }); // if you keep same image object during source updates
+      // you will have to update layer manually:
+      // this.imageNode.getLayer().batchDraw();
+
+    });
+
+    _this.shapeRef = /*#__PURE__*/_react["default"].createRef();
+    _this.trRef = /*#__PURE__*/_react["default"].createRef();
+    return _this;
+  }
+
+  _createClass(URLImage, [{
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      this.image.removeEventListener('load', this.handleLoad);
+    }
+  }, {
+    key: "loadImage",
+    value: function loadImage() {
+      this.image = new window.Image();
+      this.image.src = this.props.src;
+      this.image.addEventListener('load', this.handleLoad);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+
+      return /*#__PURE__*/_react["default"].createElement(_react["default"].Fragment, null, /*#__PURE__*/_react["default"].createElement(_reactKonva.Image, {
+        ref: this.shapeRef,
+        x: this.props.x,
+        y: this.props.y,
+        width: this.state.width,
+        height: this.state.height,
+        draggable: true,
+        image: this.state.image,
+        onTransformEnd: function onTransformEnd(e) {
+          // transformer is changing scale of the node
+          // and NOT its width or height
+          // but in the store we have only width and height
+          // to match the data better we will reset scale on transform end
+          var node = _this2.shapeRef.current;
+          var scaleX = node.scaleX();
+          var scaleY = node.scaleY(); // we will reset it back
+
+          node.scaleX(1);
+          node.scaleY(1);
+          _this2.x = node.x();
+          _this2.y = node.y(); // set minimal value
+
+          _this2.state.width = Math.max(5, node.width() * scaleX);
+          _this2.state.height = Math.max(node.height() * scaleY);
+        }
+      }), /*#__PURE__*/_react["default"].createElement(_reactKonva.Transformer, {
+        ref: this.trRef,
+        boundBoxFunc: function boundBoxFunc(oldBox, newBox) {
+          // limit resize
+          if (newBox.width < 5 || newBox.height < 5) {
+            return oldBox;
+          }
+
+          return newBox;
+        }
+      }));
+    }
+  }]);
+
+  return URLImage;
+}(_react["default"].Component);
+
+var ImageCanvas = /*#__PURE__*/function (_React$Component2) {
+  _inherits(ImageCanvas, _React$Component2);
+
+  var _super2 = _createSuper(ImageCanvas);
+
+  function ImageCanvas(props) {
+    var _this3;
+
+    _classCallCheck(this, ImageCanvas);
+
+    _this3 = _super2.call(this, props);
+
+    _defineProperty(_assertThisInitialized(_this3), "handleTextEdit", function (e) {
       console.log(e.target.value);
 
-      _this.setState({
+      _this3.setState({
         text: e.target.value
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this), "handleTextareaKeyDown", function (e) {
+    _defineProperty(_assertThisInitialized(_this3), "handleTextareaKeyDown", function (e) {
       if (e.keyCode === 13) {
-        _this.setState({
+        _this3.setState({
           textEditVisible: false
         });
       }
     });
 
-    _this.state = {
+    _this3.state = {
       text: props.body.text
     };
-    return _this;
+    return _this3;
   }
 
   _createClass(ImageCanvas, [{
     key: "render",
     value: function render() {
+      var logoUrl = this.props.logo;
+
       if (!this.props.image) {
         return /*#__PURE__*/_react["default"].createElement("div", {
           className: "ImageCanvas"
@@ -74846,7 +74972,6 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
           canvasWidth = _this$props.canvasWidth,
           canvasHeight = _this$props.canvasHeight;
       var image = this.props.image;
-      console.log(this.state.text);
       return /*#__PURE__*/_react["default"].createElement("div", {
         className: "ImageCanvas",
         id: "canvas",
@@ -74865,7 +74990,11 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
         ref: "bodyBox",
         textAttrs: this.props.body.textAttrs,
         text: this.state.text
-      }))), /*#__PURE__*/_react["default"].createElement("textarea", {
+      }), /*#__PURE__*/_react["default"].createElement(URLImage, {
+        src: logoUrl,
+        x: 150,
+        y: 150
+      }))), /*#__PURE__*/_react["default"].createElement(_Upload["default"], null), /*#__PURE__*/_react["default"].createElement("textarea", {
         value: this.state.text,
         onChange: this.handleTextEdit,
         onKeyDown: this.handleTextareaKeyDown,
@@ -74881,7 +75010,17 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
 
 ;
 
-var _default = (0, _computeImageDimensions["default"])(ImageCanvas);
+var mapStateToProps = function mapStateToProps(state) {
+  return {
+    logo: state.logo
+  };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {};
+};
+
+var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)((0, _computeImageDimensions["default"])(ImageCanvas));
 
 exports["default"] = _default;
 });
@@ -75562,7 +75701,101 @@ _defineProperty(_default, "propTypes", {
 });
 });
 
-;require.register("components/computeImageDimensions.jsx", function(exports, require, module) {
+;require.register("components/Upload.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactRedux = require("react-redux");
+
+var _actions = require("actions");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var Upload = /*#__PURE__*/function (_React$Component) {
+  _inherits(Upload, _React$Component);
+
+  var _super = _createSuper(Upload);
+
+  function Upload(props) {
+    var _this;
+
+    _classCallCheck(this, Upload);
+
+    _this = _super.call(this, props);
+    _this.state = {
+      file: null
+    };
+    _this.handleChange = _this.handleChange.bind(_assertThisInitialized(_this));
+    return _this;
+  }
+
+  _createClass(Upload, [{
+    key: "handleChange",
+    value: function handleChange(event) {
+      this.state.file = URL.createObjectURL(event.target.files[0]);
+      this.props.onChange(this.state.file);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return /*#__PURE__*/_react["default"].createElement("div", null, /*#__PURE__*/_react["default"].createElement("input", {
+        type: "file",
+        onChange: this.handleChange
+      }));
+    }
+  }]);
+
+  return Upload;
+}(_react["default"].Component);
+
+var mapStateToProps = function mapStateToProps(state) {
+  return {
+    file: state.file
+  };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    onChange: function onChange(file) {
+      dispatch((0, _actions.uploadLogo)(file));
+    }
+  };
+};
+
+var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(Upload);
+
+exports["default"] = _default;
+});
+
+require.register("components/computeImageDimensions.jsx", function(exports, require, module) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -75737,7 +75970,6 @@ var mapStateToProps = function mapStateToProps(state) {
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   return {
     onCacheDrawing: function onCacheDrawing(drawing) {
-      console.log("ets");
       dispatch((0, _actions.cacheDrawing)(drawing));
     },
     onTextChange: function onTextChange(text) {
@@ -75974,10 +76206,9 @@ var _unsplash = require("utils/unsplash");
 
 var images = (0, _unsplash.getPopularImages)();
 var initialState = {
-  filter: 'light_contrast',
   availableImages: [],
   selectedImage: null,
-  query: "",
+  logo: null,
   drawing: null,
   size: 'square',
   text: 'Exemple de texte',
@@ -76052,6 +76283,11 @@ function _default() {
         selectedImage: action.image
       });
 
+    case 'UPLOAD_LOGO':
+      return Object.assign({}, state, {
+        logo: action.logo
+      });
+
     case 'SET_SIZE':
       return Object.assign({}, state, {
         size: action.size
@@ -76096,11 +76332,6 @@ function _default() {
     case 'RECEIVE_IMAGES':
       return Object.assign({}, state, {
         availableImages: action.images
-      });
-
-    case 'SET_QUERY':
-      return Object.assign({}, state, {
-        query: action.query
       });
 
     default:

@@ -33,6 +33,12 @@ export const selectImage = (image) => ({
   image
 });
 
+export const uploadLogo = (logo) => ({
+  type: 'UPLOAD_LOGO',
+  logo
+});
+
+
 export const setSize = (size) => ({
   type: 'SET_SIZE',
   size
