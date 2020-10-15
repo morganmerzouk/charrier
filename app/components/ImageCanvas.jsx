@@ -5,18 +5,32 @@ import Spinner from './Spinner';
 import TextBox from './TextBox';
 import computeDimensions from './computeImageDimensions';
 import useImage from 'use-image';
+import Portal from './Portal';
 
 const MyImage = (image) => {
-  const [images] = useImage(image.image);
-  return <Image image={images} />;
+    const [images] = useImage(image.image);
+    return <Image image={images} crossOrigin="Anonymous" />;
 };
 
 class ImageCanvas extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            selection: [null, null]
+            text: props.body.text
         };
+    }
+    handleTextEdit = e => {
+        console.log(e.target.value)
+        this.setState({
+            text: e.target.value
+        });
+    }
+    handleTextareaKeyDown = e => {
+        if (e.keyCode === 13) {
+            this.setState({
+                textEditVisible: false
+            });
+        }
     }
 
     render() {
@@ -26,30 +40,27 @@ class ImageCanvas extends React.Component {
           </div>;
         }
         const {canvasWidth, canvasHeight} = this.props;
-        const {filter, isFocused} = this.props;
         const {image} = this.props;
-        const {text} = this.props.body;
-
-        return <div className="ImageCanvas" id="canvas">
-              <Stage width={canvasWidth} height={canvasHeight}>
-                  <Layer>
-                    <MyImage image={image} onMouseDown={this.handleClickOnImage} />
-                    <TextBox
-                      ref="bodyBox"
-                      part="body"
-                      cancelEditing={this.props.onCancelEdit}
-                      setEditing={this.props.onEdit}
-                      setFocus={this.props.onFocus.bind(this, 'body')}
-                      moveRect={this.props.onTextRectMove.bind(this)}
-                      textRect={this.props.body.textRect}
-                      textAttrs={this.props.body.textAttrs}
-                      text={this.props.body.text}
-                      onEditEnter={() => this.refs.txt.focus()}
-                      focusedPart={this.props.isFocused}
-                      isEditing={this.props.isEditing} />
-                  </Layer>
-              </Stage>
-            </div>
+        
+        console.log(this.state.text);
+        return <div className="ImageCanvas" id="canvas" crossOrigin="Anonymous">
+                    <Stage width={canvasWidth} height={canvasHeight} crossOrigin="Anonymous">
+                        <Layer crossOrigin="Anonymous">
+                            <MyImage image={image} onMouseDown={this.handleClickOnImage} crossOrigin="Anonymous" />
+                            <TextBox
+                              ref="bodyBox"
+                              textAttrs={this.props.body.textAttrs}
+                              text={this.state.text}
+                            />
+                        </Layer>
+                    </Stage>
+                    <textarea
+                        value={this.state.text}
+                        onChange={this.handleTextEdit}
+                        onKeyDown={this.handleTextareaKeyDown}
+                        style={{ width: "100%" }}
+                    />
+                </div>
     }
 };
 

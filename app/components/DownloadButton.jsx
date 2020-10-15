@@ -14,7 +14,6 @@ export default class extends React.Component {
   handleDownload(e) {
 
     var canvas = document.getElementsByTagName("canvas")[0];
-    console.log(canvas);
     var ctx = canvas.getContext("2d");
     
     var dt = canvas.toDataURL('image/png');

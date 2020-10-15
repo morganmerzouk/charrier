@@ -74690,7 +74690,6 @@ var _default = /*#__PURE__*/function (_React$Component) {
     key: "handleDownload",
     value: function handleDownload(e) {
       var canvas = document.getElementsByTagName("canvas")[0];
-      console.log(canvas);
       var ctx = canvas.getContext("2d");
       var dt = canvas.toDataURL('image/png');
       /* Change MIME type to trick the browser to download the file instead of displaying it */
@@ -74749,6 +74748,8 @@ var _computeImageDimensions = _interopRequireDefault(require("./computeImageDime
 
 var _useImage3 = _interopRequireDefault(require("use-image"));
 
+var _Portal = _interopRequireDefault(require("./Portal"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -74773,6 +74774,8 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -74791,7 +74794,8 @@ var MyImage = function MyImage(image) {
       images = _useImage2[0];
 
   return /*#__PURE__*/_react["default"].createElement(_reactKonva.Image, {
-    image: images
+    image: images,
+    crossOrigin: "Anonymous"
   });
 };
 
@@ -74806,8 +74810,25 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
     _classCallCheck(this, ImageCanvas);
 
     _this = _super.call(this, props);
+
+    _defineProperty(_assertThisInitialized(_this), "handleTextEdit", function (e) {
+      console.log(e.target.value);
+
+      _this.setState({
+        text: e.target.value
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleTextareaKeyDown", function (e) {
+      if (e.keyCode === 13) {
+        _this.setState({
+          textEditVisible: false
+        });
+      }
+    });
+
     _this.state = {
-      selection: [null, null]
+      text: props.body.text
     };
     return _this;
   }
@@ -74815,8 +74836,6 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
   _createClass(ImageCanvas, [{
     key: "render",
     value: function render() {
-      var _this2 = this;
-
       if (!this.props.image) {
         return /*#__PURE__*/_react["default"].createElement("div", {
           className: "ImageCanvas"
@@ -74826,36 +74845,34 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
       var _this$props = this.props,
           canvasWidth = _this$props.canvasWidth,
           canvasHeight = _this$props.canvasHeight;
-      var _this$props2 = this.props,
-          filter = _this$props2.filter,
-          isFocused = _this$props2.isFocused;
       var image = this.props.image;
-      var text = this.props.body.text;
+      console.log(this.state.text);
       return /*#__PURE__*/_react["default"].createElement("div", {
         className: "ImageCanvas",
-        id: "canvas"
+        id: "canvas",
+        crossOrigin: "Anonymous"
       }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Stage, {
         width: canvasWidth,
-        height: canvasHeight
-      }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Layer, null, /*#__PURE__*/_react["default"].createElement(MyImage, {
+        height: canvasHeight,
+        crossOrigin: "Anonymous"
+      }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Layer, {
+        crossOrigin: "Anonymous"
+      }, /*#__PURE__*/_react["default"].createElement(MyImage, {
         image: image,
-        onMouseDown: this.handleClickOnImage
+        onMouseDown: this.handleClickOnImage,
+        crossOrigin: "Anonymous"
       }), /*#__PURE__*/_react["default"].createElement(_TextBox["default"], {
         ref: "bodyBox",
-        part: "body",
-        cancelEditing: this.props.onCancelEdit,
-        setEditing: this.props.onEdit,
-        setFocus: this.props.onFocus.bind(this, 'body'),
-        moveRect: this.props.onTextRectMove.bind(this),
-        textRect: this.props.body.textRect,
         textAttrs: this.props.body.textAttrs,
-        text: this.props.body.text,
-        onEditEnter: function onEditEnter() {
-          return _this2.refs.txt.focus();
-        },
-        focusedPart: this.props.isFocused,
-        isEditing: this.props.isEditing
-      }))));
+        text: this.state.text
+      }))), /*#__PURE__*/_react["default"].createElement("textarea", {
+        value: this.state.text,
+        onChange: this.handleTextEdit,
+        onKeyDown: this.handleTextareaKeyDown,
+        style: {
+          width: "100%"
+        }
+      }));
     }
   }]);
 
@@ -75239,8 +75256,6 @@ var _reactKonva = require("react-konva");
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
-var _Portal = _interopRequireDefault(require("./Portal"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -75304,20 +75319,6 @@ var _default = /*#__PURE__*/function (_React$Component) {
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this), "handleTextEdit", function (e) {
-      _this.setState({
-        text: e.target.value
-      });
-    });
-
-    _defineProperty(_assertThisInitialized(_this), "handleTextareaKeyDown", function (e) {
-      if (e.keyCode === 13) {
-        _this.setState({
-          textEditVisible: false
-        });
-      }
-    });
-
     _this.shapeRef = /*#__PURE__*/_react["default"].createRef();
     _this.trRef = /*#__PURE__*/_react["default"].createRef();
     _this.state = {
@@ -75340,7 +75341,7 @@ var _default = /*#__PURE__*/function (_React$Component) {
       return /*#__PURE__*/_react["default"].createElement(_react["default"].Fragment, null, /*#__PURE__*/_react["default"].createElement(_reactKonva.Text, {
         draggable: true,
         ref: this.shapeRef,
-        text: this.state.text,
+        text: this.props.text,
         fontStyle: textAttrs.bold ? 'bold' : textAttrs.italic ? 'italic' : '',
         fill: textAttrs.color,
         fontSize: textAttrs.fontSize,
@@ -75381,11 +75382,7 @@ var _default = /*#__PURE__*/function (_React$Component) {
 
           return newBox;
         }
-      }), /*#__PURE__*/_react["default"].createElement(_Portal["default"], null, /*#__PURE__*/_react["default"].createElement("textarea", {
-        value: this.state.text,
-        onChange: this.handleTextEdit,
-        onKeyDown: this.handleTextareaKeyDown
-      })));
+      }));
     }
   }]);
 
@@ -75397,13 +75394,6 @@ exports["default"] = _default;
 _defineProperty(_default, "propTypes", {
   text: _propTypes["default"].string.isRequired,
   textAttrs: _propTypes["default"].object.isRequired,
-  textRect: _propTypes["default"].array.isRequired,
-  focusedPart: _propTypes["default"].oneOfType([_propTypes["default"].string, _propTypes["default"].bool]).isRequired,
-  isEditing: _propTypes["default"].bool.isRequired,
-  part: _propTypes["default"].string.isRequired,
-  cancelEditing: _propTypes["default"].func.isRequired,
-  setFocus: _propTypes["default"].func.isRequired,
-  moveRect: _propTypes["default"].func.isRequired,
   textEditVisible: _propTypes["default"].bool
 });
 });
@@ -76273,9 +76263,7 @@ var images = [{
 }, {
   url: 'https://images.unsplash.com/photo-1458640904116-093b74971de9?fm=jpg',
   tags: ['dark', 'field']
-}, //{ url: 'https://images.unsplash.com/photo-1453227588063-bb302b62f50b?fm=jpg' },
-//{ url: 'https://images.unsplash.com/photo-1451906278231-17b8ff0a8880?fm=jpg' },
-{
+}, {
   url: 'https://images.unsplash.com/photo-1447969025943-8219c41ea47a?fm=jpg',
   tags: ['cat', 'kitten']
 }, {

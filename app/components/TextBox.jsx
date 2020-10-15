@@ -1,20 +1,12 @@
 import React from 'react';
-import { Stage, Layer, Group, Rect, Text, Circle, Line, Image, Transformer } from 'react-konva';
+import { Stage, Layer, Group, Rect, Text, Circle, Line, Transformer } from 'react-konva';
 import PropTypes from 'prop-types';
-import Portal from './Portal';
 
 export default class extends React.Component {
 
     static propTypes = {
         text: PropTypes.string.isRequired,
         textAttrs: PropTypes.object.isRequired,
-        textRect: PropTypes.array.isRequired,
-        focusedPart: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]).isRequired,
-        isEditing: PropTypes.bool.isRequired,
-        part: PropTypes.string.isRequired,
-        cancelEditing: PropTypes.func.isRequired,
-        setFocus: PropTypes.func.isRequired,
-        moveRect: PropTypes.func.isRequired,
         textEditVisible: PropTypes.bool,
     };
 
@@ -50,28 +42,15 @@ export default class extends React.Component {
             textareaY: canvasCoords.y + absPos.y
         });
     }
-    handleTextEdit = e => {
-        this.setState({
-            text: e.target.value
-        });
-    }
-    handleTextareaKeyDown = e => {
-        if (e.keyCode === 13) {
-            this.setState({
-                textEditVisible: false
-            });
-        }
-    }
 
     render() {
         const {textAttrs, textRect} = this.props;
-
         return (
             <React.Fragment>
                 <Text 
                     draggable
                     ref={this.shapeRef}
-                    text={this.state.text}
+                    text={this.props.text}
                     fontStyle={textAttrs.bold ? 'bold' : textAttrs.italic ? 'italic' : '' } 
                     fill={textAttrs.color}
                     fontSize={textAttrs.fontSize}
@@ -114,13 +93,6 @@ export default class extends React.Component {
                     return newBox;
                   }}
                 />
-                <Portal>
-                    <textarea
-                        value={this.state.text}
-                        onChange={this.handleTextEdit}
-                        onKeyDown={this.handleTextareaKeyDown}
-                    />
-                </Portal>
             </React.Fragment>
         );
     }
