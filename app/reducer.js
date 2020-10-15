@@ -7,7 +7,8 @@ const initialState = {
   selectedImage: null,
   logo: null,
   drawing: null,
-  size: 'square',
+  width: 500,
+  height: 500,
   text: 'Exemple de texte',
   textRect: [20, 20, 500 - 40, 500 - 40],
   textAttrs: {
@@ -48,8 +49,10 @@ export default function(state = initialState, action) {
       return Object.assign({}, state, { selectedImage: action.image });
     case 'UPLOAD_LOGO':
       return Object.assign({}, state, { logo: action.logo });
-    case 'SET_SIZE':
-      return Object.assign({}, state, { size: action.size });
+    case 'SET_WIDTH':
+      return Object.assign({}, state, { width: action.width });
+    case 'SET_HEIGHT':
+      return Object.assign({}, state, { height: action.height });
     case 'SET_TEXT':
       return Object.assign({}, state, { text: action.text });
     case 'SET_TEXT_RECT':

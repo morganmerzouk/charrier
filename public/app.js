@@ -74477,7 +74477,7 @@ require.register("actions.js", function(exports, require, module) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.cacheDrawing = exports.setNoEditing = exports.setNoFocus = exports.setEditing = exports.setFocus = exports.setTextRect = exports.setText = exports.setSize = exports.uploadLogo = exports.selectImage = exports.setFilter = exports.setColor = exports.setItalic = exports.setBold = exports.setFontSize = exports.setFont = void 0;
+exports.cacheDrawing = exports.setNoEditing = exports.setNoFocus = exports.setEditing = exports.setFocus = exports.setTextRect = exports.setText = exports.setWidth = exports.setHeight = exports.uploadLogo = exports.selectImage = exports.setColor = exports.setItalic = exports.setBold = exports.setFontSize = exports.setFont = void 0;
 
 var setFont = function setFont(font) {
   return {
@@ -74524,15 +74524,6 @@ var setColor = function setColor(color) {
 
 exports.setColor = setColor;
 
-var setFilter = function setFilter(filter) {
-  return {
-    type: 'SET_FILTER',
-    filter: filter
-  };
-};
-
-exports.setFilter = setFilter;
-
 var selectImage = function selectImage(image) {
   return {
     type: 'SELECT_IMAGE',
@@ -74551,14 +74542,23 @@ var uploadLogo = function uploadLogo(logo) {
 
 exports.uploadLogo = uploadLogo;
 
-var setSize = function setSize(size) {
+var setHeight = function setHeight(height) {
   return {
-    type: 'SET_SIZE',
-    size: size
+    type: 'SET_HEIGHT',
+    height: height
   };
 };
 
-exports.setSize = setSize;
+exports.setHeight = setHeight;
+
+var setWidth = function setWidth(width) {
+  return {
+    type: 'SET_WIDTH',
+    width: width
+  };
+};
+
+exports.setWidth = setWidth;
 
 var setText = function setText(text) {
   return {
@@ -74761,8 +74761,6 @@ var _useImage3 = _interopRequireDefault(require("use-image"));
 
 var _Portal = _interopRequireDefault(require("./Portal"));
 
-var _Upload = _interopRequireDefault(require("components/Upload"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -74859,6 +74857,13 @@ var URLImage = /*#__PURE__*/function (_React$Component) {
 
     });
 
+    _defineProperty(_assertThisInitialized(_this), "onChange", function (e) {
+      _this.state.width = e.width;
+      _this.state.height = e.height;
+
+      _this.handleLoad();
+    });
+
     _this.shapeRef = /*#__PURE__*/_react["default"].createRef();
     _this.trRef = /*#__PURE__*/_react["default"].createRef();
     return _this;
@@ -74872,8 +74877,12 @@ var URLImage = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "loadImage",
     value: function loadImage() {
+      var _this$state$width, _this$state$height;
+
       this.image = new window.Image();
       this.image.src = this.props.src;
+      this.image.width = (_this$state$width = this.state.width) !== null && _this$state$width !== void 0 ? _this$state$width : 150;
+      this.image.height = (_this$state$height = this.state.height) !== null && _this$state$height !== void 0 ? _this$state$height : 150;
       this.image.addEventListener('load', this.handleLoad);
     }
   }, {
@@ -74900,11 +74909,14 @@ var URLImage = /*#__PURE__*/function (_React$Component) {
 
           node.scaleX(1);
           node.scaleY(1);
-          _this2.x = node.x();
-          _this2.y = node.y(); // set minimal value
 
-          _this2.state.width = Math.max(5, node.width() * scaleX);
-          _this2.state.height = Math.max(node.height() * scaleY);
+          _this2.onChange({
+            x: node.x(),
+            y: node.y(),
+            // set minimal value
+            width: Math.max(5, node.width() * scaleX),
+            height: Math.max(node.height() * scaleY)
+          });
         }
       }), /*#__PURE__*/_react["default"].createElement(_reactKonva.Transformer, {
         ref: this.trRef,
@@ -74936,8 +74948,6 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component2) {
     _this3 = _super2.call(this, props);
 
     _defineProperty(_assertThisInitialized(_this3), "handleTextEdit", function (e) {
-      console.log(e.target.value);
-
       _this3.setState({
         text: e.target.value
       });
@@ -74994,7 +75004,7 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component2) {
         src: logoUrl,
         x: 150,
         y: 150
-      }))), /*#__PURE__*/_react["default"].createElement(_Upload["default"], null), /*#__PURE__*/_react["default"].createElement("textarea", {
+      }))), /*#__PURE__*/_react["default"].createElement("textarea", {
         value: this.state.text,
         onChange: this.handleTextEdit,
         onKeyDown: this.handleTextareaKeyDown,
@@ -75012,7 +75022,9 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component2) {
 
 var mapStateToProps = function mapStateToProps(state) {
   return {
-    logo: state.logo
+    logo: state.logo,
+    width: state.width,
+    height: state.height
   };
 };
 
@@ -75263,8 +75275,6 @@ var _react = _interopRequireDefault(require("react"));
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
-var _Option = _interopRequireDefault(require("./Option"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -75291,61 +75301,60 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var SizeItem = function SizeItem(_ref) {
-  var name = _ref.name,
-      code = _ref.code,
-      currentCode = _ref.currentCode,
-      onSelect = _ref.onSelect;
-
-  var onClick = function onClick(e) {
-    e.preventDefault();
-    onSelect(code);
-  };
-
-  var className = "SizePicker-size SizePicker-size--".concat(code);
-  return /*#__PURE__*/_react["default"].createElement("div", {
-    className: className,
-    onClick: onClick
-  }, /*#__PURE__*/_react["default"].createElement(_Option["default"], {
-    selected: code === currentCode
-  }, name));
-};
-
 var _default = /*#__PURE__*/function (_React$Component) {
   _inherits(_default, _React$Component);
 
   var _super = _createSuper(_default);
 
   function _default() {
+    var _this;
+
     _classCallCheck(this, _default);
 
-    return _super.apply(this, arguments);
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(_assertThisInitialized(_this), "updateWidth", function (e) {
+      _this.setState({
+        width: e.target.value
+      });
+
+      _this.props.onWidthSelect(e.target.value);
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "updateHeight", function (e) {
+      _this.setState({
+        height: e.target.value
+      });
+
+      _this.props.onHeightSelect(e.target.value);
+    });
+
+    return _this;
   }
 
   _createClass(_default, [{
     key: "render",
     value: function render() {
       var _this$props = this.props,
-          size = _this$props.size,
-          onSizeSelect = _this$props.onSizeSelect;
+          width = _this$props.width,
+          height = _this$props.height,
+          onWidthSelect = _this$props.onWidthSelect,
+          onHeightSelect = _this$props.onHeightSelect;
       return /*#__PURE__*/_react["default"].createElement("div", {
         className: "SizePicker"
-      }, /*#__PURE__*/_react["default"].createElement(SizeItem, {
-        name: "1",
-        code: "tall",
-        currentCode: size,
-        onSelect: onSizeSelect
-      }), /*#__PURE__*/_react["default"].createElement(SizeItem, {
-        name: "2",
-        code: "square",
-        currentCode: size,
-        onSelect: onSizeSelect
-      }), /*#__PURE__*/_react["default"].createElement(SizeItem, {
-        name: "3",
-        code: "wide",
-        currentCode: size,
-        onSelect: onSizeSelect
-      }));
+      }, /*#__PURE__*/_react["default"].createElement("p", null, "Largeur:", /*#__PURE__*/_react["default"].createElement("input", {
+        type: "text",
+        value: width,
+        onChange: this.updateWidth
+      }), /*#__PURE__*/_react["default"].createElement("br", null)), /*#__PURE__*/_react["default"].createElement("p", null, "Hauteur:", /*#__PURE__*/_react["default"].createElement("input", {
+        type: "text",
+        value: height,
+        onChange: this.updateHeight
+      })));
     }
   }]);
 
@@ -75355,8 +75364,10 @@ var _default = /*#__PURE__*/function (_React$Component) {
 exports["default"] = _default;
 
 _defineProperty(_default, "propTypes", {
-  size: _propTypes["default"].oneOf(['tall', 'square', 'wide']).isRequired,
-  onSizeSelect: _propTypes["default"].func.isRequired
+  width: _propTypes["default"].number,
+  height: _propTypes["default"].number,
+  onWidthSelect: _propTypes["default"].func.isRequired,
+  onHeightSelect: _propTypes["default"].func.isRequired
 });
 });
 
@@ -75809,37 +75820,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
-var SIZES = {
-  tall: [500, 750],
-  square: [500, 500],
-  wide: [500, 250]
-};
-
 var _default = function _default(Component) {
   return function (_ref) {
-    var size = _ref.size,
-        rest = _objectWithoutProperties(_ref, ["size"]);
+    var width = _ref.width,
+        height = _ref.height,
+        rest = _objectWithoutProperties(_ref, ["width", "height"]);
 
-    var _SIZES$size = _slicedToArray(SIZES[size], 2),
-        canvasWidth = _SIZES$size[0],
-        canvasHeight = _SIZES$size[1];
-
+    console.log(height);
+    var canvasWidth = width,
+        canvasHeight = height;
     return /*#__PURE__*/_react["default"].createElement(Component, _extends({}, rest, {
       canvasWidth: canvasWidth,
       canvasHeight: canvasHeight
@@ -75919,8 +75912,8 @@ var App = /*#__PURE__*/function (_React$Component) {
           text = _this$props.text,
           textRect = _this$props.textRect,
           textAttrs = _this$props.textAttrs,
-          filter = _this$props.filter,
-          size = _this$props.size;
+          width = _this$props.width,
+          height = _this$props.height;
       return /*#__PURE__*/_react["default"].createElement("div", {
         className: "Container"
       }, /*#__PURE__*/_react["default"].createElement(_LeftSidebar["default"], null), /*#__PURE__*/_react["default"].createElement("div", {
@@ -75934,7 +75927,8 @@ var App = /*#__PURE__*/function (_React$Component) {
           textAttrs: textAttrs,
           textRect: textRect
         },
-        size: size,
+        width: width,
+        length: length,
         isFocused: this.props.focused,
         isEditing: this.props.editing,
         onFocus: this.props.onFocus,
@@ -75956,8 +75950,8 @@ exports.App = App;
 var mapStateToProps = function mapStateToProps(state) {
   return {
     textAttrs: state.textAttrs,
-    filter: state.filter,
-    size: state.size,
+    width: state.width,
+    height: state.height,
     selected: state.selectedImage,
     drawing: state.drawing,
     text: state.text,
@@ -76076,6 +76070,8 @@ var _SizePicker = _interopRequireDefault(require("components/SizePicker"));
 
 var _DownloadButton = _interopRequireDefault(require("components/DownloadButton"));
 
+var _Upload = _interopRequireDefault(require("components/Upload"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 var RightSidebar = function RightSidebar(_ref) {
@@ -76086,16 +76082,22 @@ var RightSidebar = function RightSidebar(_ref) {
       onColorChange = _ref.onColorChange,
       onBoldChange = _ref.onBoldChange,
       onItalicChange = _ref.onItalicChange,
-      size = _ref.size,
-      onSizeSelect = _ref.onSizeSelect;
+      width = _ref.width,
+      onWidthSelect = _ref.onWidthSelect,
+      height = _ref.height,
+      onHeightSelect = _ref.onHeightSelect;
   return /*#__PURE__*/_react["default"].createElement("div", {
     className: "Sidebar"
   }, /*#__PURE__*/_react["default"].createElement(_Card["default"], {
     title: "Format"
   }, /*#__PURE__*/_react["default"].createElement(_SizePicker["default"], {
-    size: size,
-    onSizeSelect: onSizeSelect
+    width: width,
+    onWidthSelect: onWidthSelect,
+    height: height,
+    onHeightSelect: onHeightSelect
   })), /*#__PURE__*/_react["default"].createElement(_Card["default"], {
+    title: "Logo"
+  }, /*#__PURE__*/_react["default"].createElement(_Upload["default"], null)), /*#__PURE__*/_react["default"].createElement(_Card["default"], {
     title: "Texte"
   }, /*#__PURE__*/_react["default"].createElement(_TextPropertiesPicker["default"], {
     textAttrs: textAttrs,
@@ -76113,7 +76115,8 @@ var mapStateToProps = function mapStateToProps(state) {
   return {
     textAttrs: state.textAttrs,
     filter: state.filter,
-    size: state.size,
+    width: state.width,
+    height: state.height,
     drawing: state.drawing
   };
 };
@@ -76135,8 +76138,11 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
     onItalicChange: function onItalicChange(italic) {
       dispatch((0, _actions.setItalic)(italic));
     },
-    onSizeSelect: function onSizeSelect(size) {
-      dispatch((0, _actions.setSize)(size));
+    onHeightSelect: function onHeightSelect(height) {
+      dispatch((0, _actions.setHeight)(parseInt(height)));
+    },
+    onWidthSelect: function onWidthSelect(width) {
+      dispatch((0, _actions.setWidth)(parseInt(width)));
     }
   };
 };
@@ -76210,7 +76216,8 @@ var initialState = {
   selectedImage: null,
   logo: null,
   drawing: null,
-  size: 'square',
+  width: 500,
+  height: 500,
   text: 'Exemple de texte',
   textRect: [20, 20, 500 - 40, 500 - 40],
   textAttrs: {
@@ -76288,9 +76295,14 @@ function _default() {
         logo: action.logo
       });
 
-    case 'SET_SIZE':
+    case 'SET_WIDTH':
       return Object.assign({}, state, {
-        size: action.size
+        width: action.width
+      });
+
+    case 'SET_HEIGHT':
+      return Object.assign({}, state, {
+        height: action.height
       });
 
     case 'SET_TEXT':
@@ -76480,35 +76492,13 @@ function rootSaga() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.searchImages = exports.getPopularImages = void 0;
-// TODO: query a real API
+exports.getPopularImages = void 0;
 var images = [{
-  url: 'https://images.unsplash.com/photo-1461016951828-c09537329b3a?fm=jpg',
-  tags: ['field', 'landscape', 'sunlight']
+  url: 'https://images.unsplash.com/photo-1461016951828-c09537329b3a?fm=jpg'
 }, {
-  url: 'https://images.unsplash.com/photo-1461295025362-7547f63dbaea?fm=jpg',
-  tags: ['crops']
+  url: 'https://images.unsplash.com/photo-1461295025362-7547f63dbaea?fm=jpg'
 }, {
-  url: 'https://images.unsplash.com/photo-1465326117523-6450112b60b2?fm=jpg',
-  tags: ['forest', 'hill']
-}, {
-  url: 'https://images.unsplash.com/photo-1458640904116-093b74971de9?fm=jpg',
-  tags: ['dark', 'field']
-}, {
-  url: 'https://images.unsplash.com/photo-1447969025943-8219c41ea47a?fm=jpg',
-  tags: ['cat', 'kitten']
-}, {
-  url: 'https://images.unsplash.com/photo-1421749810611-438cc492b581?fm=jpg',
-  tags: ['water', 'landscape']
-}, {
-  url: 'https://images.unsplash.com/photo-1449960238630-7e720e630019?fm=jpg',
-  tags: ['water', 'seaside']
-}, {
-  url: 'https://images.unsplash.com/photo-1433190152045-5a94184895da?fm=jpg',
-  tags: ['water', 'cliff']
-}, {
-  url: 'https://images.unsplash.com/9/fields.jpg?ixlib=rb-0.3.5&q=80&fm=jpg',
-  tags: ['field', 'stack']
+  url: 'https://images.unsplash.com/photo-1465326117523-6450112b60b2?fm=jpg'
 }];
 
 var getPopularImages = function getPopularImages() {
@@ -76516,17 +76506,6 @@ var getPopularImages = function getPopularImages() {
 };
 
 exports.getPopularImages = getPopularImages;
-
-var searchImages = function searchImages(query) {
-  var filteredImages = images.filter(function (img) {
-    return img.tags.some(function (tag) {
-      return tag.indexOf(query) !== -1;
-    });
-  });
-  return Promise.resolve(filteredImages);
-};
-
-exports.searchImages = searchImages;
 });
 
 require.alias("babel-polyfill/lib/index.js", "babel-polyfill");

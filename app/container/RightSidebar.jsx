@@ -1,16 +1,20 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {setFilter, setFont, setFontSize, setColor, setBold, setItalic, setSize} from 'actions';
+import {setFont, setFontSize, setColor, setBold, setItalic, setWidth, setHeight} from 'actions';
 
 import Card from 'components/Card';
 import TextPropertiesPicker from 'components/TextPropertiesPicker';
 import SizePicker from 'components/SizePicker';
 import DownloadButton from 'components/DownloadButton';
+import Upload from 'components/Upload';
 
-const RightSidebar = ({ drawing, textAttrs, onFontChange, onFontSizeChange, onColorChange, onBoldChange, onItalicChange, size, onSizeSelect }) => {
+const RightSidebar = ({ drawing, textAttrs, onFontChange, onFontSizeChange, onColorChange, onBoldChange, onItalicChange, width, onWidthSelect, height, onHeightSelect }) => {
   return <div className="Sidebar">
     <Card title="Format">
-      <SizePicker size={size} onSizeSelect={onSizeSelect} />
+      <SizePicker width={width} onWidthSelect={onWidthSelect} height={height} onHeightSelect={onHeightSelect} />
+    </Card>
+    <Card title="Logo">
+      <Upload />
     </Card>
     <Card title="Texte">
       <TextPropertiesPicker
@@ -28,7 +32,8 @@ const RightSidebar = ({ drawing, textAttrs, onFontChange, onFontSizeChange, onCo
 const mapStateToProps = (state) => ({
   textAttrs: state.textAttrs,
   filter: state.filter,
-  size: state.size,
+  width: state.width,
+  height: state.height,
   drawing: state.drawing
 });
 
@@ -53,8 +58,12 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(setItalic(italic));
   },
 
-  onSizeSelect(size) {
-    dispatch(setSize(size));
+  onHeightSelect(height) {
+    dispatch(setHeight(parseInt(height)));
+  },
+
+  onWidthSelect(width) {
+    dispatch(setWidth(parseInt(width)));
   }
 });
 

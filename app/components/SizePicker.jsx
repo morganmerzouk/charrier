@@ -1,34 +1,41 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Option from './Option';
-
-const SizeItem = ({ name, code, currentCode, onSelect }) => {
-  const onClick = (e) => {
-    e.preventDefault();
-    onSelect(code);
-  };
-  const className = `SizePicker-size SizePicker-size--${code}`;
-
-  return <div className={className} onClick={onClick}>
-    <Option selected={code === currentCode}>
-      {name}
-    </Option>
-  </div>
-};
 
 export default class extends React.Component {
-  static propTypes = {
-      size: PropTypes.oneOf(['tall', 'square', 'wide']).isRequired,
-      onSizeSelect: PropTypes.func.isRequired
-  };
-  render() {
-    const {size, onSizeSelect} = this.props;
+    static propTypes = {
+        width: PropTypes.number,
+        height: PropTypes.number,
+        onWidthSelect: PropTypes.func.isRequired,
+        onHeightSelect: PropTypes.func.isRequired
+    };
 
-    return <div className="SizePicker">
-      <SizeItem name="1" code="tall" currentCode={size} onSelect={onSizeSelect} />
-      <SizeItem name="2" code="square" currentCode={size} onSelect={onSizeSelect} />
-      <SizeItem name="3" code="wide" currentCode={size} onSelect={onSizeSelect} />
-    </div>;
-  }
+    updateWidth = e => {
+        this.setState({
+            width: e.target.value
+        });
+        this.props.onWidthSelect(e.target.value);
+    }
+
+    updateHeight = e => {
+        this.setState({
+            height: e.target.value
+        });
+        this.props.onHeightSelect(e.target.value);
+    }
+
+    render() {
+        const {width, height, onWidthSelect, onHeightSelect} = this.props;
+
+        return <div className="SizePicker">
+            <p>
+                Largeur:
+                <input type="text" value={width} onChange={this.updateWidth} /><br />
+            </p>
+            <p>
+                Hauteur:
+                <input type="text" value={height} onChange={this.updateHeight} />
+            </p>
+        </div>;
+    }
 }
 

@@ -15,7 +15,7 @@ export class App extends React.Component {
   render() {
     const selectedUrl = this.props.selected && this.props.selected.url;
     
-    const {text, textRect, textAttrs, filter, size} = this.props;
+    const {text, textRect, textAttrs, width, height} = this.props;
     return (
       <div className="Container">
         <LeftSidebar />
@@ -26,7 +26,8 @@ export class App extends React.Component {
             body={{
               text, textAttrs, textRect
             }}
-            size={size}
+            width={width}
+            length={length}
             isFocused={this.props.focused}
             isEditing={this.props.editing}
             onFocus={this.props.onFocus}
@@ -45,8 +46,8 @@ export class App extends React.Component {
 
 const mapStateToProps = (state) => ({
     textAttrs: state.textAttrs,
-    filter: state.filter,
-    size: state.size,
+    width: state.width,
+    height: state.height,
     selected: state.selectedImage,
     drawing: state.drawing,
     text: state.text,

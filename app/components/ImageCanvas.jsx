@@ -7,7 +7,6 @@ import TextBox from './TextBox';
 import computeDimensions from './computeImageDimensions';
 import useImage from 'use-image';
 import Portal from './Portal';
-import Upload from 'components/Upload';
 
 const MyImage = (image) => {
     const [images] = useImage(image.image);
@@ -47,6 +46,8 @@ class URLImage extends React.Component {
     loadImage() {
         this.image = new window.Image();
         this.image.src = this.props.src;
+        this.image.width = this.state.width ?? 150;
+        this.image.height = this.state.height ?? 150;
         this.image.addEventListener('load', this.handleLoad);
     }
     handleLoad = () => {
@@ -59,6 +60,12 @@ class URLImage extends React.Component {
         // you will have to update layer manually:
         // this.imageNode.getLayer().batchDraw();
     }
+
+    onChange = (e) => {
+        this.state.width = e.width;
+        this.state.height = e.height;
+        this.handleLoad();
+    }
     
     render() {
         return (
@@ -66,7 +73,7 @@ class URLImage extends React.Component {
                 <Image
                     ref={this.shapeRef}
                     x={this.props.x}
-                    y={this.props.y}                    
+                    y={this.props.y}
                     width={this.state.width}
                     height={this.state.height}
                     draggable
@@ -83,11 +90,13 @@ class URLImage extends React.Component {
                         // we will reset it back
                         node.scaleX(1);
                         node.scaleY(1);
-                        this.x= node.x();
-                        this.y= node.y();
-                        // set minimal value
-                        this.state.width= Math.max(5, node.width() * scaleX);
-                        this.state.height= Math.max(node.height() * scaleY);
+                        this.onChange({
+                            x: node.x(),
+                            y: node.y(),
+                            // set minimal value
+                            width: Math.max(5, node.width() * scaleX),
+                            height: Math.max(node.height() * scaleY),
+                        });
                     }}
                 />
 
@@ -114,7 +123,6 @@ class ImageCanvas extends React.Component {
         };
     }
     handleTextEdit = e => {
-        console.log(e.target.value)
         this.setState({
             text: e.target.value
         });
@@ -146,10 +154,13 @@ class ImageCanvas extends React.Component {
                               textAttrs={this.props.body.textAttrs}
                               text={this.state.text}
                             />
-                            <URLImage src={logoUrl} x={150} y={150} />
+                            <URLImage 
+                                src={logoUrl} 
+                                x={150} 
+                                y={150}
+                            />
                         </Layer>
                     </Stage>
-                    <Upload />
                     <textarea
                         value={this.state.text}
                         onChange={this.handleTextEdit}
@@ -163,6 +174,8 @@ class ImageCanvas extends React.Component {
 
 const mapStateToProps = (state) => ({
     logo: state.logo,
+    width: state.width,
+    height: state.height,
 });
 const mapDispatchToProps = (dispatch) => ({
 });

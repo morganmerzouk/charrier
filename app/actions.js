@@ -23,11 +23,6 @@ export const setColor = (color) => ({
   color
 });
 
-export const setFilter = (filter) => ({
-  type: 'SET_FILTER',
-  filter
-});
-
 export const selectImage = (image) => ({
   type: 'SELECT_IMAGE',
   image
@@ -38,10 +33,14 @@ export const uploadLogo = (logo) => ({
   logo
 });
 
+export const setHeight = (height) => ({
+  type: 'SET_HEIGHT',
+  height
+});
 
-export const setSize = (size) => ({
-  type: 'SET_SIZE',
-  size
+export const setWidth = (width) => ({
+  type: 'SET_WIDTH',
+  width
 });
 
 export const setText = (text) => ({
