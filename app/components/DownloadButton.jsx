@@ -7,6 +7,10 @@ export default class extends React.Component {
       drawing: PropTypes.string
   };
 
+  constructor(props) {
+    super(props)
+  }
+
   handleDownload(e) {
     const uri = this.props.drawing;
     const link = e.target;
@@ -16,7 +20,7 @@ export default class extends React.Component {
 
   render() {
     return <div>
-      <a className="Button" download="pabla.jpg" target="_blank" onClick={this.handleDownload}>Download</a>
+        <a className="Button" download="test.jpg" target="_blank" onClick={this.handleDownload.bind(this)}>Télécharger</a>
     </div>;
   }
 }

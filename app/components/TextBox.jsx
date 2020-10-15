@@ -71,111 +71,123 @@ export default class extends React.Component {
         }
     }
 
-  getFocusState() {
-    const {focusedPart, isEditing} = this.props;
-    return {
-      isFocused: focusedPart === this.props.part,
-      isEditing: focusedPart === this.props.part && isEditing
-    };
-  }
-
-  cancelEdit(e) {
-    if (keys[e.which] === 'escape') {
-      this.props.cancelEditing();
-      e.target.blur();
-    }
-  }
-
-  handleMouseDown(e, mousePos, sub) {
-    this.startPos = mousePos;
-
-    this.mouseHeld = true;
-    if (this.getFocusState().isFocused) {
-      this.mouseDown = new Date;
-    }
-    this.props.setFocus();
-  }
-
-  handleMouseMove(e, mousePos) {
-    if (!this.mouseHeld) return;
-
-    const {startPos} = this;
-    const mouseDiff = {
-      x: startPos.x - mousePos.x,
-      y: startPos.y - mousePos.y
-    };
-
-    const {isFocused, isEditing} = this.getFocusState();
-
-    if (isFocused && !isEditing && !this.snap) {
-      // drag text box
-      const {textRect} = this.props;
-      const newRect = moveRect(textRect, mouseDiff);
-      this.props.moveRect(newRect);
-      this.startPos = mousePos;
-    } else if (isFocused && isEditing) {
-      //select text
-      const cursor1 = startPos;
-      const cursor2 = mousePos;
-
-      const {textRect, textAttrs, text} = this.props;
-      let idx1 = findIdxForCursor(_ctx, textRect, cursor1, textAttrs, text);
-      let idx2 = findIdxForCursor(_ctx, textRect, cursor2, textAttrs, text);
-      this.props.onAreaSelection(idx1, idx2);
-    }
-  }
-
-  handleMouseUp(e) {
-    if (this.mouseDown && (new Date - this.mouseDown) < 200) {
-      const {startPos} = this;
-      const {text, textAttrs, textRect} = this.props;
-      const cursor = findIdxForCursor(_ctx, textRect, startPos, textAttrs, text);
-      this.props.onSetCursor(cursor);
-      this.props.setEditing();
-      this.props.onEditEnter();
+    getFocusState() {
+        const {focusedPart, isEditing} = this.props;
+        return {
+          isFocused: focusedPart === this.props.part,
+          isEditing: focusedPart === this.props.part && isEditing
+        };
     }
 
-    this.mouseDown = null;
-    this.mouseHeld = false;
-  }
+    cancelEdit(e) {
+        if (keys[e.which] === 'escape') {
+            this.props.cancelEditing();
+            e.target.blur();
+        }
+    }
 
-  render() {
-    const {isFocused, isEditing} = this.getFocusState();
-    const {text, textAttrs, textRect} = this.props;
-    const {mouseHeld} = this;
+    handleMouseDown(e, mousePos, sub) {
+        this.startPos = mousePos;
 
-    const selectionRectFrames = this.getSelectionRects();
-    const selectionRects = selectionRectFrames.map((frame, i) => {
-      return <Rect key={i} fill={makeBlue(0.5)} frame={frame} />;
-    });
+        this.mouseHeld = true;
+        if (this.getFocusState().isFocused) {
+            this.mouseDown = new Date;
+        }
+        this.props.setFocus();
+    }
 
-    const {left: leftSnapFrame, right: rightSnapFrame} = this.getSnapFrames();
-    const cursorCoords = this.getCursorCoords(selectionRects);
-    const outlineColor = mouseHeld ? makeBlue(0.5) : '#0092d1';
+    handleMouseMove(e, mousePos) {
+        if (!this.mouseHeld) return;
 
-    // invisible rect to allow text selection/dragging
-    return <Group>
-      <Rect
-        frame={textRect}
-        fill="rgba(0,0,0,0)"
-        mouseSnap={true}
-        onMouseDown={this.handleMouseDown}
-        onMouseMove={this.handleMouseMove}
-        onMouseUp={this.handleMouseUp} />
-      {isFocused ?
-        <Snap frame={leftSnapFrame} textRect={textRect} color={outlineColor} direction="left" onMove={this.props.moveRect} /> :
-        null}
-      {isFocused ?
-        <Snap frame={rightSnapFrame} textRect={textRect} color={outlineColor} direction="right" onMove={this.props.moveRect} /> :
-        null}
-      <Text text={text} frame={textRect} textAttrs={textAttrs} onUpdateRect={this.props.moveRect} />
-      {isFocused ?
-        <Line width={2} frame={textRect} color={outlineColor} /> :
-        null}
-      {cursorCoords && isEditing ?
-        <Cursor coords={cursorCoords} /> :
-        null}
-      {isEditing ? selectionRects : null}
-    </Group>;
-  }
+        const {startPos} = this;
+        const mouseDiff = {
+          x: startPos.x - mousePos.x,
+          y: startPos.y - mousePos.y
+        };
+
+        const {isFocused, isEditing} = this.getFocusState();
+
+        if (isFocused && !isEditing && !this.snap) {
+          // drag text box
+          const {textRect} = this.props;
+          const newRect = moveRect(textRect, mouseDiff);
+          this.props.moveRect(newRect);
+          this.startPos = mousePos;
+        } else if (isFocused && isEditing) {
+          //select text
+          const cursor1 = startPos;
+          const cursor2 = mousePos;
+
+          const {textRect, textAttrs, text} = this.props;
+          let idx1 = findIdxForCursor(_ctx, textRect, cursor1, textAttrs, text);
+          let idx2 = findIdxForCursor(_ctx, textRect, cursor2, textAttrs, text);
+          this.props.onAreaSelection(idx1, idx2);
+        }
+    }
+
+    handleMouseUp(e) {
+        if (this.mouseDown && (new Date - this.mouseDown) < 200) {
+              const {startPos} = this;
+              const {text, textAttrs, textRect} = this.props;
+              const cursor = findIdxForCursor(_ctx, textRect, startPos, textAttrs, text);
+              this.props.onSetCursor(cursor);
+              this.props.setEditing();
+              this.props.onEditEnter();
+        }
+
+        this.mouseDown = null;
+        this.mouseHeld = false;
+    }
+
+    render() {
+        const {isFocused, isEditing} = this.getFocusState();
+        const {text, textAttrs, textRect} = this.props;
+        const {mouseHeld} = this;
+
+        const selectionRectFrames = this.getSelectionRects();
+        const selectionRects = selectionRectFrames.map((frame, i) => {
+            return <Rect key={i} fill={makeBlue(0.5)} frame={frame} />;
+        });
+
+        const {left: leftSnapFrame, right: rightSnapFrame} = this.getSnapFrames();
+        const cursorCoords = this.getCursorCoords(selectionRects);
+        const outlineColor = mouseHeld ? makeBlue(0.5) : '#0092d1';
+
+        // invisible rect to allow text selection/dragging
+        return <Group>
+            <Rect
+            frame={textRect}
+            fill="rgba(0,0,0,0)"
+            mouseSnap={true}
+            onMouseDown={this.handleMouseDown}
+            onMouseMove={this.handleMouseMove}
+            onMouseUp={this.handleMouseUp} />
+            {isFocused ?
+            <Snap frame={leftSnapFrame} textRect={textRect} color={outlineColor} direction="left" onMove={this.props.moveRect} /> :
+            null}
+            {isFocused ?
+            <Snap frame={rightSnapFrame} textRect={textRect} color={outlineColor} direction="right" onMove={this.props.moveRect} /> :
+            null}
+            <Text 
+            draggable
+            text={text}
+            fontStyle={textAttrs.bold ? 'bold' : textAttrs.italic ? 'italic' : '' } 
+            fill={textAttrs.color}
+            fontSize={textAttrs.fontSize}
+            fontFamily={textAttrs.font}
+            frame={textRect} 
+            textAttrs={textAttrs} 
+            onUpdateRect={this.props.moveRect}
+            onDragEnd={this.props.changeSize}
+            onDragStart={this.props.changeSize}
+            />
+            {isFocused ?
+            <Line width={2} frame={textRect} color={outlineColor} /> :
+            null}
+            {cursorCoords && isEditing ?
+            <Cursor coords={cursorCoords} /> :
+            null}
+            {isEditing ? selectionRects : null}
+            </Group>;
+    }
 }

@@ -55,27 +55,27 @@ export default class extends React.Component {
     const {font, fontSize, color, bold, italic} = this.props.textAttrs;
     return <div className="TextPropsPicker">
       <p>
-        Font:
-        <select ref="font" value={font} onChange={this.updateFont}>
+        Police:
+        <select ref="font" value={font} onChange={this.updateFont.bind(this)}>
           {fonts.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </p>
       <p>
-        Font size:
-        <select ref="fontSize" value={fontSize} onChange={this.updateFontSize}>
+        Taille:
+        <select ref="fontSize" value={fontSize} onChange={this.updateFontSize.bind(this)}>
           {fontSizes.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </p>
 
       <div className="TextPropsPicker-style">
-        <div className="TextPropsPicker-style-bold" onClick={this.updateBold}>
+        <div className="TextPropsPicker-style-bold" onClick={this.updateBold.bind(this)}>
           <Option selected={bold}>
-            <span>Bold</span>
+            <strong>Gras</strong>
           </Option>
         </div>
-        <div className="TextPropsPicker-style-italic" onClick={this.updateItalic}>
+        <div className="TextPropsPicker-style-italic" onClick={this.updateItalic.bind(this)}>
           <Option selected={italic}>
-            <span>Italic</span>
+            <em>Italique</em>
           </Option>
         </div>
       </div>

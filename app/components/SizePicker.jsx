@@ -25,9 +25,9 @@ export default class extends React.Component {
     const {size, onSizeSelect} = this.props;
 
     return <div className="SizePicker">
-      <SizeItem name="Tall" code="tall" currentCode={size} onSelect={onSizeSelect} />
-      <SizeItem name="Square" code="square" currentCode={size} onSelect={onSizeSelect} />
-      <SizeItem name="Wide" code="wide" currentCode={size} onSelect={onSizeSelect} />
+      <SizeItem name="1" code="tall" currentCode={size} onSelect={onSizeSelect} />
+      <SizeItem name="2" code="square" currentCode={size} onSelect={onSizeSelect} />
+      <SizeItem name="3" code="wide" currentCode={size} onSelect={onSizeSelect} />
     </div>;
   }
 }

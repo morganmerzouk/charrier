@@ -75357,10 +75357,10 @@ var _default = /*#__PURE__*/function (_React$Component) {
 
   var _super = _createSuper(_default);
 
-  function _default() {
+  function _default(props) {
     _classCallCheck(this, _default);
 
-    return _super.apply(this, arguments);
+    return _super.call(this, props);
   }
 
   _createClass(_default, [{
@@ -75376,10 +75376,10 @@ var _default = /*#__PURE__*/function (_React$Component) {
     value: function render() {
       return /*#__PURE__*/_react["default"].createElement("div", null, /*#__PURE__*/_react["default"].createElement("a", {
         className: "Button",
-        download: "pabla.jpg",
+        download: "test.jpg",
         target: "_blank",
-        onClick: this.handleDownload
-      }, "Download"));
+        onClick: this.handleDownload.bind(this)
+      }, "T\xE9l\xE9charger"));
     }
   }]);
 
@@ -75457,10 +75457,6 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-var makeBlue = function makeBlue(alpha) {
-  return "rgba(87, 205, 255, ".concat(alpha, ")");
-};
-
 var MyImage = function MyImage(image) {
   var _useImage = (0, _useImage3["default"])(image.image),
       _useImage2 = _slicedToArray(_useImage, 1),
@@ -75513,6 +75509,7 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "redraw",
     value: function redraw() {
+      console.log("est");
       this.forceUpdate();
     }
   }, {
@@ -75541,49 +75538,6 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
       this.setNoFocus();
     }
   }, {
-    key: "getGuideLines",
-    value: function getGuideLines() {
-      var _this$props = this.props,
-          canvasWidth = _this$props.canvasWidth,
-          canvasHeight = _this$props.canvasHeight;
-      var horizontal = [[0, canvasHeight / 2], [canvasWidth, canvasHeight / 2]];
-      var vertical = [[canvasWidth / 2, 0], [canvasWidth / 2, canvasHeight]];
-      return {
-        horizontal: horizontal,
-        vertical: vertical
-      };
-    }
-  }, {
-    key: "closeToGuides",
-    value: function closeToGuides(part) {
-      var _this$props2 = this.props,
-          canvasWidth = _this$props2.canvasWidth,
-          canvasHeight = _this$props2.canvasHeight;
-      var isFocused = this.props.isFocused;
-      if (!isFocused) return {
-        horizontal: false,
-        vertical: false
-      };
-      var rect = this.props[part].textRect;
-      var textCenter = (0, _pixels.rectCenter)(rect);
-      var canvasCenter = {
-        x: canvasWidth / 2,
-        y: canvasHeight / 2
-      };
-
-      var _diffWithin = (0, _pixels.diffWithin)(canvasCenter, textCenter, {
-        x: 1,
-        y: 1
-      }),
-          vertical = _diffWithin.xWithin,
-          horizontal = _diffWithin.yWithin;
-
-      return {
-        horizontal: horizontal,
-        vertical: vertical
-      };
-    }
-  }, {
     key: "render",
     value: function render() {
       var _this2 = this;
@@ -75594,23 +75548,14 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
         }, /*#__PURE__*/_react["default"].createElement(_Spinner["default"], null));
       }
 
-      var _this$props3 = this.props,
-          canvasWidth = _this$props3.canvasWidth,
-          canvasHeight = _this$props3.canvasHeight;
-      var _this$props4 = this.props,
-          filter = _this$props4.filter,
-          isFocused = _this$props4.isFocused;
+      var _this$props = this.props,
+          canvasWidth = _this$props.canvasWidth,
+          canvasHeight = _this$props.canvasHeight;
+      var _this$props2 = this.props,
+          filter = _this$props2.filter,
+          isFocused = _this$props2.isFocused;
       var image = this.props.image;
       var text = this.props.body.text;
-
-      var _this$getGuideLines = this.getGuideLines(),
-          horizontalGuideLine = _this$getGuideLines.horizontal,
-          verticalGuideLine = _this$getGuideLines.vertical;
-
-      var _ref = isFocused ? this.closeToGuides(isFocused) : {},
-          showHorizontalGuide = _ref.horizontal,
-          showVerticalGuide = _ref.vertical;
-
       return /*#__PURE__*/_react["default"].createElement("div", {
         className: "ImageCanvas"
       }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Stage, {
@@ -75619,17 +75564,7 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
       }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Layer, null, /*#__PURE__*/_react["default"].createElement(MyImage, {
         image: image,
         onMouseDown: this.handleClickOnImage
-      }), showHorizontalGuide ? /*#__PURE__*/_react["default"].createElement(_reactKonva.Line, {
-        color: makeBlue(0.85),
-        width: 2,
-        from: horizontalGuideLine[0],
-        to: horizontalGuideLine[1]
-      }) : null, showVerticalGuide ? /*#__PURE__*/_react["default"].createElement(_reactKonva.Line, {
-        color: makeBlue(0.85),
-        width: 2,
-        from: verticalGuideLine[0],
-        to: verticalGuideLine[1]
-      }) : null, /*#__PURE__*/_react["default"].createElement(_TextBox["default"], {
+      }), /*#__PURE__*/_react["default"].createElement(_TextBox["default"], {
         ref: "bodyBox",
         part: "body",
         cancelEditing: this.props.onCancelEdit,
@@ -75655,20 +75590,7 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
         },
         focusedPart: this.props.isFocused,
         isEditing: this.props.isEditing
-      }))), /*#__PURE__*/_react["default"].createElement("textarea", {
-        ref: "txt",
-        value: text,
-        onChange: function onChange(e) {
-          return _this2.props.onTextChange(e.target.value);
-        },
-        onSelect: this.updateCursor,
-        onKeyUp: this.cancelEdit,
-        style: {
-          height: 1,
-          width: 1,
-          opacity: 0
-        }
-      }));
+      }))));
     }
   }]);
 
@@ -75986,17 +75908,17 @@ var _default = /*#__PURE__*/function (_React$Component) {
       return /*#__PURE__*/_react["default"].createElement("div", {
         className: "SizePicker"
       }, /*#__PURE__*/_react["default"].createElement(SizeItem, {
-        name: "Tall",
+        name: "1",
         code: "tall",
         currentCode: size,
         onSelect: onSizeSelect
       }), /*#__PURE__*/_react["default"].createElement(SizeItem, {
-        name: "Square",
+        name: "2",
         code: "square",
         currentCode: size,
         onSelect: onSizeSelect
       }), /*#__PURE__*/_react["default"].createElement(SizeItem, {
-        name: "Wide",
+        name: "3",
         code: "wide",
         currentCode: size,
         onSelect: onSizeSelect
@@ -76327,10 +76249,17 @@ var _default = /*#__PURE__*/function (_React$Component) {
         direction: "right",
         onMove: this.props.moveRect
       }) : null, /*#__PURE__*/_react["default"].createElement(_reactKonva.Text, {
+        draggable: true,
         text: text,
+        fontStyle: textAttrs.bold ? 'bold' : textAttrs.italic ? 'italic' : '',
+        fill: textAttrs.color,
+        fontSize: textAttrs.fontSize,
+        fontFamily: textAttrs.font,
         frame: textRect,
         textAttrs: textAttrs,
-        onUpdateRect: this.props.moveRect
+        onUpdateRect: this.props.moveRect,
+        onDragEnd: this.props.changeSize,
+        onDragStart: this.props.changeSize
       }), isFocused ? /*#__PURE__*/_react["default"].createElement(_reactKonva.Line, {
         width: 2,
         frame: textRect,
@@ -76669,19 +76598,19 @@ var _default = /*#__PURE__*/function (_React$Component) {
           italic = _this$props$textAttrs.italic;
       return /*#__PURE__*/_react["default"].createElement("div", {
         className: "TextPropsPicker"
-      }, /*#__PURE__*/_react["default"].createElement("p", null, "Font:", /*#__PURE__*/_react["default"].createElement("select", {
+      }, /*#__PURE__*/_react["default"].createElement("p", null, "Police:", /*#__PURE__*/_react["default"].createElement("select", {
         ref: "font",
         value: font,
-        onChange: this.updateFont
+        onChange: this.updateFont.bind(this)
       }, fonts.map(function (s) {
         return /*#__PURE__*/_react["default"].createElement("option", {
           key: s,
           value: s
         }, s);
-      }))), /*#__PURE__*/_react["default"].createElement("p", null, "Font size:", /*#__PURE__*/_react["default"].createElement("select", {
+      }))), /*#__PURE__*/_react["default"].createElement("p", null, "Taille:", /*#__PURE__*/_react["default"].createElement("select", {
         ref: "fontSize",
         value: fontSize,
-        onChange: this.updateFontSize
+        onChange: this.updateFontSize.bind(this)
       }, fontSizes.map(function (s) {
         return /*#__PURE__*/_react["default"].createElement("option", {
           key: s,
@@ -76691,15 +76620,15 @@ var _default = /*#__PURE__*/function (_React$Component) {
         className: "TextPropsPicker-style"
       }, /*#__PURE__*/_react["default"].createElement("div", {
         className: "TextPropsPicker-style-bold",
-        onClick: this.updateBold
+        onClick: this.updateBold.bind(this)
       }, /*#__PURE__*/_react["default"].createElement(_Option["default"], {
         selected: bold
-      }, /*#__PURE__*/_react["default"].createElement("span", null, "Bold"))), /*#__PURE__*/_react["default"].createElement("div", {
+      }, /*#__PURE__*/_react["default"].createElement("strong", null, "Gras"))), /*#__PURE__*/_react["default"].createElement("div", {
         className: "TextPropsPicker-style-italic",
-        onClick: this.updateItalic
+        onClick: this.updateItalic.bind(this)
       }, /*#__PURE__*/_react["default"].createElement(_Option["default"], {
         selected: italic
-      }, /*#__PURE__*/_react["default"].createElement("span", null, "Italic")))), /*#__PURE__*/_react["default"].createElement("div", {
+      }, /*#__PURE__*/_react["default"].createElement("em", null, "Italique")))), /*#__PURE__*/_react["default"].createElement("div", {
         className: "TextPropsPicker-colors"
       }, colors.map(function (color) {
         return /*#__PURE__*/_react["default"].createElement("div", {
@@ -77011,7 +76940,7 @@ var App = /*#__PURE__*/function (_React$Component) {
         onBlur: this.props.onBlur,
         onCancelEdit: this.props.onCancelEdit,
         onTextRectMove: this.props.onTextRectMove,
-        onRedraw: this.updateDrawnImage,
+        onChange: this.props.updateDrawnImage,
         onTextChange: this.props.onTextChange
       })), /*#__PURE__*/_react["default"].createElement(_RightSidebar["default"], null));
     }
@@ -77039,6 +76968,7 @@ var mapStateToProps = function mapStateToProps(state) {
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   return {
     onCacheDrawing: function onCacheDrawing(drawing) {
+      console.log("ets");
       dispatch((0, _actions.cacheDrawing)(drawing));
     },
     onTextChange: function onTextChange(text) {
@@ -77184,12 +77114,12 @@ var RightSidebar = function RightSidebar(_ref) {
   return /*#__PURE__*/_react["default"].createElement("div", {
     className: "Sidebar"
   }, /*#__PURE__*/_react["default"].createElement(_Card["default"], {
-    title: "Sizes"
+    title: "Format"
   }, /*#__PURE__*/_react["default"].createElement(_SizePicker["default"], {
     size: size,
     onSizeSelect: onSizeSelect
   })), /*#__PURE__*/_react["default"].createElement(_Card["default"], {
-    title: "Text"
+    title: "Texte"
   }, /*#__PURE__*/_react["default"].createElement(_TextPropertiesPicker["default"], {
     textAttrs: textAttrs,
     onFontChange: onFontChange,
@@ -77308,7 +77238,7 @@ var initialState = {
   query: "",
   drawing: null,
   size: 'square',
-  text: '“Others have seen what is and asked why. I have seen what could be and asked why not.”\n- Pablo Picasso',
+  text: 'Text',
   textRect: [20, 20, 500 - 40, 500 - 40],
   textAttrs: {
     fontSize: 32,

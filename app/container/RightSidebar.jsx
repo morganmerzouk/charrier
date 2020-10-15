@@ -9,10 +9,10 @@ import DownloadButton from 'components/DownloadButton';
 
 const RightSidebar = ({ drawing, filter, onFilterChange, textAttrs, onFontChange, onFontSizeChange, onColorChange, onBoldChange, onItalicChange, size, onSizeSelect }) => {
   return <div className="Sidebar">
-    <Card title="Sizes">
+    <Card title="Format">
       <SizePicker size={size} onSizeSelect={onSizeSelect} />
     </Card>
-    <Card title="Text">
+    <Card title="Texte">
       <TextPropertiesPicker
         textAttrs={textAttrs}
         onFontChange={onFontChange}

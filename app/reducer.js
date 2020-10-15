@@ -9,7 +9,7 @@ const initialState = {
   query: "",
   drawing: null,
   size: 'square',
-  text: '“Others have seen what is and asked why. I have seen what could be and asked why not.”\n- Pablo Picasso',
+  text: 'Text',
   textRect: [20, 20, 500 - 40, 500 - 40],
   textAttrs: {
     fontSize: 32,

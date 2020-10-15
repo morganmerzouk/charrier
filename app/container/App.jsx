@@ -34,7 +34,7 @@ export class App extends React.Component {
             onBlur={this.props.onBlur}
             onCancelEdit={this.props.onCancelEdit}
             onTextRectMove={this.props.onTextRectMove}
-            onRedraw={this.updateDrawnImage}
+            onChange={this.props.updateDrawnImage}
             onTextChange={this.props.onTextChange} />
         </div>
         <RightSidebar />
@@ -44,19 +44,20 @@ export class App extends React.Component {
 }
 
 const mapStateToProps = (state) => ({
-  textAttrs: state.textAttrs,
-  filter: state.filter,
-  size: state.size,
-  selected: state.selectedImage,
-  drawing: state.drawing,
-  text: state.text,
-  textRect: state.textRect,
-  focused: state.focused,
-  editing: state.editing
+    textAttrs: state.textAttrs,
+    filter: state.filter,
+    size: state.size,
+    selected: state.selectedImage,
+    drawing: state.drawing,
+    text: state.text,
+    textRect: state.textRect,
+    focused: state.focused,
+    editing: state.editing
 });
 
 const mapDispatchToProps = (dispatch) => ({
   onCacheDrawing(drawing) {
+    console.log("ets");
     dispatch(cacheDrawing(drawing));
   },
 
