@@ -7,7 +7,7 @@ import TextPropertiesPicker from 'components/TextPropertiesPicker';
 import SizePicker from 'components/SizePicker';
 import DownloadButton from 'components/DownloadButton';
 
-const RightSidebar = ({ drawing, filter, onFilterChange, textAttrs, onFontChange, onFontSizeChange, onColorChange, onBoldChange, onItalicChange, size, onSizeSelect }) => {
+const RightSidebar = ({ drawing, textAttrs, onFontChange, onFontSizeChange, onColorChange, onBoldChange, onItalicChange, size, onSizeSelect }) => {
   return <div className="Sidebar">
     <Card title="Format">
       <SizePicker size={size} onSizeSelect={onSizeSelect} />
@@ -51,10 +51,6 @@ const mapDispatchToProps = (dispatch) => ({
 
   onItalicChange(italic) {
     dispatch(setItalic(italic));
-  },
-
-  onFilterChange(filter) {
-    dispatch(setFilter(filter));
   },
 
   onSizeSelect(size) {

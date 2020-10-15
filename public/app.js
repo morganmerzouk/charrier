@@ -74359,657 +74359,6 @@ if ('development' === 'production') {
   })();
 });
 
-require.register("stackblur-canvas/dist/stackblur.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "stackblur-canvas");
-  (function() {
-    (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.StackBlur = {}));
-}(this, (function (exports) { 'use strict';
-
-  function _typeof(obj) {
-    "@babel/helpers - typeof";
-
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
-        return typeof obj;
-      };
-    } else {
-      _typeof = function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-      };
-    }
-
-    return _typeof(obj);
-  }
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  /* eslint-disable no-bitwise -- used for calculations */
-
-  /* eslint-disable unicorn/prefer-query-selector -- aiming at
-    backward-compatibility */
-
-  /**
-  * StackBlur - a fast almost Gaussian Blur For Canvas
-  *
-  * In case you find this class useful - especially in commercial projects -
-  * I am not totally unhappy for a small donation to my PayPal account
-  * mario@quasimondo.de
-  *
-  * Or support me on flattr:
-  * {@link https://flattr.com/thing/72791/StackBlur-a-fast-almost-Gaussian-Blur-Effect-for-CanvasJavascript}.
-  *
-  * @module StackBlur
-  * @author Mario Klingemann
-  * Contact: mario@quasimondo.com
-  * Website: {@link http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html}
-  * Twitter: @quasimondo
-  *
-  * @copyright (c) 2010 Mario Klingemann
-  *
-  * Permission is hereby granted, free of charge, to any person
-  * obtaining a copy of this software and associated documentation
-  * files (the "Software"), to deal in the Software without
-  * restriction, including without limitation the rights to use,
-  * copy, modify, merge, publish, distribute, sublicense, and/or sell
-  * copies of the Software, and to permit persons to whom the
-  * Software is furnished to do so, subject to the following
-  * conditions:
-  *
-  * The above copyright notice and this permission notice shall be
-  * included in all copies or substantial portions of the Software.
-  *
-  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-  * OTHER DEALINGS IN THE SOFTWARE.
-  */
-  var mulTable = [512, 512, 456, 512, 328, 456, 335, 512, 405, 328, 271, 456, 388, 335, 292, 512, 454, 405, 364, 328, 298, 271, 496, 456, 420, 388, 360, 335, 312, 292, 273, 512, 482, 454, 428, 405, 383, 364, 345, 328, 312, 298, 284, 271, 259, 496, 475, 456, 437, 420, 404, 388, 374, 360, 347, 335, 323, 312, 302, 292, 282, 273, 265, 512, 497, 482, 468, 454, 441, 428, 417, 405, 394, 383, 373, 364, 354, 345, 337, 328, 320, 312, 305, 298, 291, 284, 278, 271, 265, 259, 507, 496, 485, 475, 465, 456, 446, 437, 428, 420, 412, 404, 396, 388, 381, 374, 367, 360, 354, 347, 341, 335, 329, 323, 318, 312, 307, 302, 297, 292, 287, 282, 278, 273, 269, 265, 261, 512, 505, 497, 489, 482, 475, 468, 461, 454, 447, 441, 435, 428, 422, 417, 411, 405, 399, 394, 389, 383, 378, 373, 368, 364, 359, 354, 350, 345, 341, 337, 332, 328, 324, 320, 316, 312, 309, 305, 301, 298, 294, 291, 287, 284, 281, 278, 274, 271, 268, 265, 262, 259, 257, 507, 501, 496, 491, 485, 480, 475, 470, 465, 460, 456, 451, 446, 442, 437, 433, 428, 424, 420, 416, 412, 408, 404, 400, 396, 392, 388, 385, 381, 377, 374, 370, 367, 363, 360, 357, 354, 350, 347, 344, 341, 338, 335, 332, 329, 326, 323, 320, 318, 315, 312, 310, 307, 304, 302, 299, 297, 294, 292, 289, 287, 285, 282, 280, 278, 275, 273, 271, 269, 267, 265, 263, 261, 259];
-  var shgTable = [9, 11, 12, 13, 13, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 17, 17, 17, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24];
-  /**
-   * @param {string|HTMLImageElement} img
-   * @param {string|HTMLCanvasElement} canvas
-   * @param {Float} radius
-   * @param {boolean} blurAlphaChannel
-   * @param {boolean} useOffsetWidth
-   * @returns {undefined}
-   */
-
-  function processImage(img, canvas, radius, blurAlphaChannel, useOffsetWidth) {
-    if (typeof img === 'string') {
-      img = document.getElementById(img);
-    }
-
-    if (!img || !('naturalWidth' in img)) {
-      return;
-    }
-
-    var dimensionType = useOffsetWidth ? 'offset' : 'natural';
-    var w = img[dimensionType + 'Width'];
-    var h = img[dimensionType + 'Height'];
-
-    if (typeof canvas === 'string') {
-      canvas = document.getElementById(canvas);
-    }
-
-    if (!canvas || !('getContext' in canvas)) {
-      return;
-    }
-
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    canvas.width = w;
-    canvas.height = h;
-    var context = canvas.getContext('2d');
-    context.clearRect(0, 0, w, h);
-    context.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, w, h);
-
-    if (isNaN(radius) || radius < 1) {
-      return;
-    }
-
-    if (blurAlphaChannel) {
-      processCanvasRGBA(canvas, 0, 0, w, h, radius);
-    } else {
-      processCanvasRGB(canvas, 0, 0, w, h, radius);
-    }
-  }
-  /**
-   * @param {string|HTMLCanvasElement} canvas
-   * @param {Integer} topX
-   * @param {Integer} topY
-   * @param {Integer} width
-   * @param {Integer} height
-   * @throws {Error|TypeError}
-   * @returns {ImageData} See {@link https://html.spec.whatwg.org/multipage/canvas.html#imagedata}
-   */
-
-
-  function getImageDataFromCanvas(canvas, topX, topY, width, height) {
-    if (typeof canvas === 'string') {
-      canvas = document.getElementById(canvas);
-    }
-
-    if (!canvas || _typeof(canvas) !== 'object' || !('getContext' in canvas)) {
-      throw new TypeError('Expecting canvas with `getContext` method ' + 'in processCanvasRGB(A) calls!');
-    }
-
-    var context = canvas.getContext('2d');
-
-    try {
-      return context.getImageData(topX, topY, width, height);
-    } catch (e) {
-      throw new Error('unable to access image data: ' + e);
-    }
-  }
-  /**
-   * @param {HTMLCanvasElement} canvas
-   * @param {Integer} topX
-   * @param {Integer} topY
-   * @param {Integer} width
-   * @param {Integer} height
-   * @param {Float} radius
-   * @returns {undefined}
-   */
-
-
-  function processCanvasRGBA(canvas, topX, topY, width, height, radius) {
-    if (isNaN(radius) || radius < 1) {
-      return;
-    }
-
-    radius |= 0;
-    var imageData = getImageDataFromCanvas(canvas, topX, topY, width, height);
-    imageData = processImageDataRGBA(imageData, topX, topY, width, height, radius);
-    canvas.getContext('2d').putImageData(imageData, topX, topY);
-  }
-  /**
-   * @param {ImageData} imageData
-   * @param {Integer} topX
-   * @param {Integer} topY
-   * @param {Integer} width
-   * @param {Integer} height
-   * @param {Float} radius
-   * @returns {ImageData}
-   */
-
-
-  function processImageDataRGBA(imageData, topX, topY, width, height, radius) {
-    var pixels = imageData.data;
-    var div = 2 * radius + 1; // const w4 = width << 2;
-
-    var widthMinus1 = width - 1;
-    var heightMinus1 = height - 1;
-    var radiusPlus1 = radius + 1;
-    var sumFactor = radiusPlus1 * (radiusPlus1 + 1) / 2;
-    var stackStart = new BlurStack();
-    var stack = stackStart;
-    var stackEnd;
-
-    for (var i = 1; i < div; i++) {
-      stack = stack.next = new BlurStack();
-
-      if (i === radiusPlus1) {
-        stackEnd = stack;
-      }
-    }
-
-    stack.next = stackStart;
-    var stackIn = null,
-        stackOut = null,
-        yw = 0,
-        yi = 0;
-    var mulSum = mulTable[radius];
-    var shgSum = shgTable[radius];
-
-    for (var y = 0; y < height; y++) {
-      stack = stackStart;
-      var pr = pixels[yi],
-          pg = pixels[yi + 1],
-          pb = pixels[yi + 2],
-          pa = pixels[yi + 3];
-
-      for (var _i = 0; _i < radiusPlus1; _i++) {
-        stack.r = pr;
-        stack.g = pg;
-        stack.b = pb;
-        stack.a = pa;
-        stack = stack.next;
-      }
-
-      var rInSum = 0,
-          gInSum = 0,
-          bInSum = 0,
-          aInSum = 0,
-          rOutSum = radiusPlus1 * pr,
-          gOutSum = radiusPlus1 * pg,
-          bOutSum = radiusPlus1 * pb,
-          aOutSum = radiusPlus1 * pa,
-          rSum = sumFactor * pr,
-          gSum = sumFactor * pg,
-          bSum = sumFactor * pb,
-          aSum = sumFactor * pa;
-
-      for (var _i2 = 1; _i2 < radiusPlus1; _i2++) {
-        var p = yi + ((widthMinus1 < _i2 ? widthMinus1 : _i2) << 2);
-        var r = pixels[p],
-            g = pixels[p + 1],
-            b = pixels[p + 2],
-            a = pixels[p + 3];
-        var rbs = radiusPlus1 - _i2;
-        rSum += (stack.r = r) * rbs;
-        gSum += (stack.g = g) * rbs;
-        bSum += (stack.b = b) * rbs;
-        aSum += (stack.a = a) * rbs;
-        rInSum += r;
-        gInSum += g;
-        bInSum += b;
-        aInSum += a;
-        stack = stack.next;
-      }
-
-      stackIn = stackStart;
-      stackOut = stackEnd;
-
-      for (var x = 0; x < width; x++) {
-        var paInitial = aSum * mulSum >> shgSum;
-        pixels[yi + 3] = paInitial;
-
-        if (paInitial !== 0) {
-          var _a2 = 255 / paInitial;
-
-          pixels[yi] = (rSum * mulSum >> shgSum) * _a2;
-          pixels[yi + 1] = (gSum * mulSum >> shgSum) * _a2;
-          pixels[yi + 2] = (bSum * mulSum >> shgSum) * _a2;
-        } else {
-          pixels[yi] = pixels[yi + 1] = pixels[yi + 2] = 0;
-        }
-
-        rSum -= rOutSum;
-        gSum -= gOutSum;
-        bSum -= bOutSum;
-        aSum -= aOutSum;
-        rOutSum -= stackIn.r;
-        gOutSum -= stackIn.g;
-        bOutSum -= stackIn.b;
-        aOutSum -= stackIn.a;
-
-        var _p = x + radius + 1;
-
-        _p = yw + (_p < widthMinus1 ? _p : widthMinus1) << 2;
-        rInSum += stackIn.r = pixels[_p];
-        gInSum += stackIn.g = pixels[_p + 1];
-        bInSum += stackIn.b = pixels[_p + 2];
-        aInSum += stackIn.a = pixels[_p + 3];
-        rSum += rInSum;
-        gSum += gInSum;
-        bSum += bInSum;
-        aSum += aInSum;
-        stackIn = stackIn.next;
-        var _stackOut = stackOut,
-            _r = _stackOut.r,
-            _g = _stackOut.g,
-            _b = _stackOut.b,
-            _a = _stackOut.a;
-        rOutSum += _r;
-        gOutSum += _g;
-        bOutSum += _b;
-        aOutSum += _a;
-        rInSum -= _r;
-        gInSum -= _g;
-        bInSum -= _b;
-        aInSum -= _a;
-        stackOut = stackOut.next;
-        yi += 4;
-      }
-
-      yw += width;
-    }
-
-    for (var _x = 0; _x < width; _x++) {
-      yi = _x << 2;
-
-      var _pr = pixels[yi],
-          _pg = pixels[yi + 1],
-          _pb = pixels[yi + 2],
-          _pa = pixels[yi + 3],
-          _rOutSum = radiusPlus1 * _pr,
-          _gOutSum = radiusPlus1 * _pg,
-          _bOutSum = radiusPlus1 * _pb,
-          _aOutSum = radiusPlus1 * _pa,
-          _rSum = sumFactor * _pr,
-          _gSum = sumFactor * _pg,
-          _bSum = sumFactor * _pb,
-          _aSum = sumFactor * _pa;
-
-      stack = stackStart;
-
-      for (var _i3 = 0; _i3 < radiusPlus1; _i3++) {
-        stack.r = _pr;
-        stack.g = _pg;
-        stack.b = _pb;
-        stack.a = _pa;
-        stack = stack.next;
-      }
-
-      var yp = width;
-      var _gInSum = 0,
-          _bInSum = 0,
-          _aInSum = 0,
-          _rInSum = 0;
-
-      for (var _i4 = 1; _i4 <= radius; _i4++) {
-        yi = yp + _x << 2;
-
-        var _rbs = radiusPlus1 - _i4;
-
-        _rSum += (stack.r = _pr = pixels[yi]) * _rbs;
-        _gSum += (stack.g = _pg = pixels[yi + 1]) * _rbs;
-        _bSum += (stack.b = _pb = pixels[yi + 2]) * _rbs;
-        _aSum += (stack.a = _pa = pixels[yi + 3]) * _rbs;
-        _rInSum += _pr;
-        _gInSum += _pg;
-        _bInSum += _pb;
-        _aInSum += _pa;
-        stack = stack.next;
-
-        if (_i4 < heightMinus1) {
-          yp += width;
-        }
-      }
-
-      yi = _x;
-      stackIn = stackStart;
-      stackOut = stackEnd;
-
-      for (var _y = 0; _y < height; _y++) {
-        var _p2 = yi << 2;
-
-        pixels[_p2 + 3] = _pa = _aSum * mulSum >> shgSum;
-
-        if (_pa > 0) {
-          _pa = 255 / _pa;
-          pixels[_p2] = (_rSum * mulSum >> shgSum) * _pa;
-          pixels[_p2 + 1] = (_gSum * mulSum >> shgSum) * _pa;
-          pixels[_p2 + 2] = (_bSum * mulSum >> shgSum) * _pa;
-        } else {
-          pixels[_p2] = pixels[_p2 + 1] = pixels[_p2 + 2] = 0;
-        }
-
-        _rSum -= _rOutSum;
-        _gSum -= _gOutSum;
-        _bSum -= _bOutSum;
-        _aSum -= _aOutSum;
-        _rOutSum -= stackIn.r;
-        _gOutSum -= stackIn.g;
-        _bOutSum -= stackIn.b;
-        _aOutSum -= stackIn.a;
-        _p2 = _x + ((_p2 = _y + radiusPlus1) < heightMinus1 ? _p2 : heightMinus1) * width << 2;
-        _rSum += _rInSum += stackIn.r = pixels[_p2];
-        _gSum += _gInSum += stackIn.g = pixels[_p2 + 1];
-        _bSum += _bInSum += stackIn.b = pixels[_p2 + 2];
-        _aSum += _aInSum += stackIn.a = pixels[_p2 + 3];
-        stackIn = stackIn.next;
-        _rOutSum += _pr = stackOut.r;
-        _gOutSum += _pg = stackOut.g;
-        _bOutSum += _pb = stackOut.b;
-        _aOutSum += _pa = stackOut.a;
-        _rInSum -= _pr;
-        _gInSum -= _pg;
-        _bInSum -= _pb;
-        _aInSum -= _pa;
-        stackOut = stackOut.next;
-        yi += width;
-      }
-    }
-
-    return imageData;
-  }
-  /**
-   * @param {HTMLCanvasElement} canvas
-   * @param {Integer} topX
-   * @param {Integer} topY
-   * @param {Integer} width
-   * @param {Integer} height
-   * @param {Float} radius
-   * @returns {undefined}
-   */
-
-
-  function processCanvasRGB(canvas, topX, topY, width, height, radius) {
-    if (isNaN(radius) || radius < 1) {
-      return;
-    }
-
-    radius |= 0;
-    var imageData = getImageDataFromCanvas(canvas, topX, topY, width, height);
-    imageData = processImageDataRGB(imageData, topX, topY, width, height, radius);
-    canvas.getContext('2d').putImageData(imageData, topX, topY);
-  }
-  /**
-   * @param {ImageData} imageData
-   * @param {Integer} topX
-   * @param {Integer} topY
-   * @param {Integer} width
-   * @param {Integer} height
-   * @param {Float} radius
-   * @returns {ImageData}
-   */
-
-
-  function processImageDataRGB(imageData, topX, topY, width, height, radius) {
-    var pixels = imageData.data;
-    var div = 2 * radius + 1; // const w4 = width << 2;
-
-    var widthMinus1 = width - 1;
-    var heightMinus1 = height - 1;
-    var radiusPlus1 = radius + 1;
-    var sumFactor = radiusPlus1 * (radiusPlus1 + 1) / 2;
-    var stackStart = new BlurStack();
-    var stack = stackStart;
-    var stackEnd;
-
-    for (var i = 1; i < div; i++) {
-      stack = stack.next = new BlurStack();
-
-      if (i === radiusPlus1) {
-        stackEnd = stack;
-      }
-    }
-
-    stack.next = stackStart;
-    var stackIn = null;
-    var stackOut = null;
-    var mulSum = mulTable[radius];
-    var shgSum = shgTable[radius];
-    var p, rbs;
-    var yw = 0,
-        yi = 0;
-
-    for (var y = 0; y < height; y++) {
-      var pr = pixels[yi],
-          pg = pixels[yi + 1],
-          pb = pixels[yi + 2],
-          rOutSum = radiusPlus1 * pr,
-          gOutSum = radiusPlus1 * pg,
-          bOutSum = radiusPlus1 * pb,
-          rSum = sumFactor * pr,
-          gSum = sumFactor * pg,
-          bSum = sumFactor * pb;
-      stack = stackStart;
-
-      for (var _i5 = 0; _i5 < radiusPlus1; _i5++) {
-        stack.r = pr;
-        stack.g = pg;
-        stack.b = pb;
-        stack = stack.next;
-      }
-
-      var rInSum = 0,
-          gInSum = 0,
-          bInSum = 0;
-
-      for (var _i6 = 1; _i6 < radiusPlus1; _i6++) {
-        p = yi + ((widthMinus1 < _i6 ? widthMinus1 : _i6) << 2);
-        rSum += (stack.r = pr = pixels[p]) * (rbs = radiusPlus1 - _i6);
-        gSum += (stack.g = pg = pixels[p + 1]) * rbs;
-        bSum += (stack.b = pb = pixels[p + 2]) * rbs;
-        rInSum += pr;
-        gInSum += pg;
-        bInSum += pb;
-        stack = stack.next;
-      }
-
-      stackIn = stackStart;
-      stackOut = stackEnd;
-
-      for (var x = 0; x < width; x++) {
-        pixels[yi] = rSum * mulSum >> shgSum;
-        pixels[yi + 1] = gSum * mulSum >> shgSum;
-        pixels[yi + 2] = bSum * mulSum >> shgSum;
-        rSum -= rOutSum;
-        gSum -= gOutSum;
-        bSum -= bOutSum;
-        rOutSum -= stackIn.r;
-        gOutSum -= stackIn.g;
-        bOutSum -= stackIn.b;
-        p = yw + ((p = x + radius + 1) < widthMinus1 ? p : widthMinus1) << 2;
-        rInSum += stackIn.r = pixels[p];
-        gInSum += stackIn.g = pixels[p + 1];
-        bInSum += stackIn.b = pixels[p + 2];
-        rSum += rInSum;
-        gSum += gInSum;
-        bSum += bInSum;
-        stackIn = stackIn.next;
-        rOutSum += pr = stackOut.r;
-        gOutSum += pg = stackOut.g;
-        bOutSum += pb = stackOut.b;
-        rInSum -= pr;
-        gInSum -= pg;
-        bInSum -= pb;
-        stackOut = stackOut.next;
-        yi += 4;
-      }
-
-      yw += width;
-    }
-
-    for (var _x2 = 0; _x2 < width; _x2++) {
-      yi = _x2 << 2;
-
-      var _pr2 = pixels[yi],
-          _pg2 = pixels[yi + 1],
-          _pb2 = pixels[yi + 2],
-          _rOutSum2 = radiusPlus1 * _pr2,
-          _gOutSum2 = radiusPlus1 * _pg2,
-          _bOutSum2 = radiusPlus1 * _pb2,
-          _rSum2 = sumFactor * _pr2,
-          _gSum2 = sumFactor * _pg2,
-          _bSum2 = sumFactor * _pb2;
-
-      stack = stackStart;
-
-      for (var _i7 = 0; _i7 < radiusPlus1; _i7++) {
-        stack.r = _pr2;
-        stack.g = _pg2;
-        stack.b = _pb2;
-        stack = stack.next;
-      }
-
-      var _rInSum2 = 0,
-          _gInSum2 = 0,
-          _bInSum2 = 0;
-
-      for (var _i8 = 1, yp = width; _i8 <= radius; _i8++) {
-        yi = yp + _x2 << 2;
-        _rSum2 += (stack.r = _pr2 = pixels[yi]) * (rbs = radiusPlus1 - _i8);
-        _gSum2 += (stack.g = _pg2 = pixels[yi + 1]) * rbs;
-        _bSum2 += (stack.b = _pb2 = pixels[yi + 2]) * rbs;
-        _rInSum2 += _pr2;
-        _gInSum2 += _pg2;
-        _bInSum2 += _pb2;
-        stack = stack.next;
-
-        if (_i8 < heightMinus1) {
-          yp += width;
-        }
-      }
-
-      yi = _x2;
-      stackIn = stackStart;
-      stackOut = stackEnd;
-
-      for (var _y2 = 0; _y2 < height; _y2++) {
-        p = yi << 2;
-        pixels[p] = _rSum2 * mulSum >> shgSum;
-        pixels[p + 1] = _gSum2 * mulSum >> shgSum;
-        pixels[p + 2] = _bSum2 * mulSum >> shgSum;
-        _rSum2 -= _rOutSum2;
-        _gSum2 -= _gOutSum2;
-        _bSum2 -= _bOutSum2;
-        _rOutSum2 -= stackIn.r;
-        _gOutSum2 -= stackIn.g;
-        _bOutSum2 -= stackIn.b;
-        p = _x2 + ((p = _y2 + radiusPlus1) < heightMinus1 ? p : heightMinus1) * width << 2;
-        _rSum2 += _rInSum2 += stackIn.r = pixels[p];
-        _gSum2 += _gInSum2 += stackIn.g = pixels[p + 1];
-        _bSum2 += _bInSum2 += stackIn.b = pixels[p + 2];
-        stackIn = stackIn.next;
-        _rOutSum2 += _pr2 = stackOut.r;
-        _gOutSum2 += _pg2 = stackOut.g;
-        _bOutSum2 += _pb2 = stackOut.b;
-        _rInSum2 -= _pr2;
-        _gInSum2 -= _pg2;
-        _bInSum2 -= _pb2;
-        stackOut = stackOut.next;
-        yi += width;
-      }
-    }
-
-    return imageData;
-  }
-  /**
-   *
-   */
-
-
-  var BlurStack =
-  /**
-   * Set properties.
-   */
-  function BlurStack() {
-    _classCallCheck(this, BlurStack);
-
-    this.r = 0;
-    this.g = 0;
-    this.b = 0;
-    this.a = 0;
-    this.next = null;
-  };
-
-  exports.BlurStack = BlurStack;
-  exports.canvasRGB = processCanvasRGB;
-  exports.canvasRGBA = processCanvasRGBA;
-  exports.image = processImage;
-  exports.imageDataRGB = processImageDataRGB;
-  exports.imageDataRGBA = processImageDataRGBA;
-
-  Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
-  })();
-});
-
 require.register("symbol-observable/lib/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "symbol-observable");
   (function() {
@@ -75128,7 +74477,7 @@ require.register("actions.js", function(exports, require, module) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.resetSearch = exports.searchImages = exports.setQuery = exports.cacheDrawing = exports.setNoEditing = exports.setNoFocus = exports.setEditing = exports.setFocus = exports.setTextRect = exports.setText = exports.setSize = exports.selectImage = exports.setFilter = exports.setColor = exports.setItalic = exports.setBold = exports.setFontSize = exports.setFont = void 0;
+exports.cacheDrawing = exports.setNoEditing = exports.setNoFocus = exports.setEditing = exports.setFocus = exports.setTextRect = exports.setText = exports.setSize = exports.selectImage = exports.setFilter = exports.setColor = exports.setItalic = exports.setBold = exports.setFontSize = exports.setFont = void 0;
 
 var setFont = function setFont(font) {
   return {
@@ -75261,32 +74610,6 @@ var cacheDrawing = function cacheDrawing(drawing) {
 };
 
 exports.cacheDrawing = cacheDrawing;
-
-var setQuery = function setQuery(query) {
-  return {
-    type: 'SET_QUERY',
-    query: query
-  };
-};
-
-exports.setQuery = setQuery;
-
-var searchImages = function searchImages(query) {
-  return {
-    type: 'SEARCH_IMAGES',
-    query: query
-  };
-};
-
-exports.searchImages = searchImages;
-
-var resetSearch = function resetSearch() {
-  return {
-    type: 'RESET_SEARCH'
-  };
-};
-
-exports.resetSearch = resetSearch;
 });
 
 require.register("components/Card.jsx", function(exports, require, module) {
@@ -75366,6 +74689,17 @@ var _default = /*#__PURE__*/function (_React$Component) {
   _createClass(_default, [{
     key: "handleDownload",
     value: function handleDownload(e) {
+      var canvas = document.getElementsByTagName("canvas")[0];
+      console.log(canvas);
+      var ctx = canvas.getContext("2d");
+      var dt = canvas.toDataURL('image/png');
+      /* Change MIME type to trick the browser to download the file instead of displaying it */
+
+      dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
+      /* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
+
+      dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
+      this.href = dt;
       var uri = this.props.drawing;
       var link = e.target;
       link.href = uri;
@@ -75407,19 +74741,13 @@ var _reactDom = _interopRequireDefault(require("react-dom"));
 
 var _reactKonva = require("react-konva");
 
-var _pixels = require("utils/pixels");
-
 var _Spinner = _interopRequireDefault(require("./Spinner"));
 
 var _TextBox = _interopRequireDefault(require("./TextBox"));
 
 var _computeImageDimensions = _interopRequireDefault(require("./computeImageDimensions"));
 
-var _loadImage = _interopRequireDefault(require("./loadImage"));
-
 var _useImage3 = _interopRequireDefault(require("use-image"));
-
-var _textEditor = _interopRequireDefault(require("utils/textEditor"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -75479,65 +74807,12 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
 
     _this = _super.call(this, props);
     _this.state = {
-      textEditor: new _textEditor["default"](),
       selection: [null, null]
     };
     return _this;
   }
 
   _createClass(ImageCanvas, [{
-    key: "getCursors",
-    value: function getCursors() {
-      var _this$state$textEdito = this.state.textEditor,
-          start = _this$state$textEdito.start,
-          end = _this$state$textEdito.end;
-
-      if (start === end) {
-        return {
-          cursor: start,
-          cursor1: null,
-          cursor2: null
-        };
-      } else {
-        return {
-          cursor: null,
-          cursor1: start + 1,
-          cursor2: end + 1
-        };
-      }
-    }
-  }, {
-    key: "redraw",
-    value: function redraw() {
-      console.log("est");
-      this.forceUpdate();
-    }
-  }, {
-    key: "updateCursor",
-    value: function updateCursor(e) {
-      var txt = this.refs.txt;
-      var selectionStart = txt.selectionStart,
-          selectionEnd = txt.selectionEnd;
-      this.textEditor.setFromInput(selectionStart, selectionEnd);
-      setTimeout(this.redraw, 0);
-    }
-  }, {
-    key: "cancelEdit",
-    value: function cancelEdit(e) {
-      this.refs.bodyBox.cancelEdit(e);
-      setTimeout(this.redraw, 0);
-    }
-  }, {
-    key: "setNoFocus",
-    value: function setNoFocus() {
-      this.props.onBlur();
-    }
-  }, {
-    key: "handleClickOnImage",
-    value: function handleClickOnImage(e, mousePos) {
-      this.setNoFocus();
-    }
-  }, {
     key: "render",
     value: function render() {
       var _this2 = this;
@@ -75557,7 +74832,8 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
       var image = this.props.image;
       var text = this.props.body.text;
       return /*#__PURE__*/_react["default"].createElement("div", {
-        className: "ImageCanvas"
+        className: "ImageCanvas",
+        id: "canvas"
       }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Stage, {
         width: canvasWidth,
         height: canvasHeight
@@ -75574,17 +74850,6 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component) {
         textRect: this.props.body.textRect,
         textAttrs: this.props.body.textAttrs,
         text: this.props.body.text,
-        selection: this.getCursors(),
-        onAreaSelection: function onAreaSelection(start, end) {
-          _this2.textEditor.setSelection(start, end, _this2.refs.txt);
-
-          _this2.forceUpdate();
-        },
-        onSetCursor: function onSetCursor(pos) {
-          _this2.textEditor.setCursor(pos, _this2.refs.txt);
-
-          _this2.forceUpdate();
-        },
         onEditEnter: function onEditEnter() {
           return _this2.refs.txt.focus();
         },
@@ -75680,7 +74945,8 @@ var _default = /*#__PURE__*/function (_React$Component) {
           selected: sel,
           borderStyle: "thick-transparent"
         }, /*#__PURE__*/_react["default"].createElement("img", {
-          src: imageUrl
+          src: imageUrl,
+          crossOrigin: "anonymous"
         })));
       }));
     }
@@ -75829,102 +75095,6 @@ var Portal = /*#__PURE__*/function (_React$Component) {
 exports["default"] = Portal;
 });
 
-;require.register("components/SearchBar.jsx", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _react = _interopRequireDefault(require("react"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var _default = /*#__PURE__*/function (_React$Component) {
-  _inherits(_default, _React$Component);
-
-  var _super = _createSuper(_default);
-
-  function _default(props) {
-    _classCallCheck(this, _default);
-
-    return _super.call(this, props);
-  }
-
-  _createClass(_default, [{
-    key: "search",
-    value: function search(e) {
-      e.preventDefault();
-      var value = this.props.query;
-
-      if (value && value.length > 0) {
-        onSearch(value);
-      } else {
-        onSearchReset();
-      }
-    }
-  }, {
-    key: "setQuery",
-    value: function setQuery(e) {
-      e.preventDefault();
-      var value = e.target.value;
-      onQueryChange && onQueryChange(value);
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      return /*#__PURE__*/_react["default"].createElement("form", {
-        onSubmit: this.search
-      }, /*#__PURE__*/_react["default"].createElement("input", {
-        type: "text",
-        className: "SearchBar",
-        placeholder: "Search images",
-        onChange: this.setQuery,
-        value: this.props.query
-      }));
-    }
-  }]);
-
-  return _default;
-}(_react["default"].Component);
-
-exports["default"] = _default;
-
-_defineProperty(_default, "propTypes", {
-  query: _propTypes["default"].string.isRequired,
-  onSearch: _propTypes["default"].func.isRequired,
-  onSearchReset: _propTypes["default"].func.isRequired,
-  onQueryChange: _propTypes["default"].func.isRequired
-});
-});
-
 ;require.register("components/SizePicker.jsx", function(exports, require, module) {
 "use strict";
 
@@ -76067,16 +75237,6 @@ var _react = _interopRequireDefault(require("react"));
 
 var _reactKonva = require("react-konva");
 
-var _TextBoxSnap = _interopRequireDefault(require("./TextBoxSnap"));
-
-var _TextBoxCursor = _interopRequireDefault(require("./TextBoxCursor"));
-
-var _text = require("utils/text");
-
-var _keyboard = require("utils/keyboard");
-
-var _pixels = require("utils/pixels");
-
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
 var _Portal = _interopRequireDefault(require("./Portal"));
@@ -76084,18 +75244,6 @@ var _Portal = _interopRequireDefault(require("./Portal"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -76123,6 +75271,20 @@ var _default = /*#__PURE__*/function (_React$Component) {
   _inherits(_default, _React$Component);
 
   var _super = _createSuper(_default);
+
+  _createClass(_default, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.trRef.current.nodes([this.shapeRef.current]);
+      this.trRef.current.getLayer().batchDraw();
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      this.trRef.current.nodes([this.shapeRef.current]);
+      this.trRef.current.getLayer().batchDraw();
+    }
+  }]);
 
   function _default(props) {
     var _this;
@@ -76156,228 +75318,71 @@ var _default = /*#__PURE__*/function (_React$Component) {
       }
     });
 
+    _this.shapeRef = /*#__PURE__*/_react["default"].createRef();
+    _this.trRef = /*#__PURE__*/_react["default"].createRef();
     _this.state = {
       textEditVisible: false,
-      text: props.text
+      text: props.text,
+      x: props.x,
+      y: props.y
     };
     return _this;
   }
 
   _createClass(_default, [{
-    key: "getCursors",
-    value: function getCursors() {
-      return this.props.selection;
-    }
-  }, {
-    key: "getSnapFrames",
-    value: function getSnapFrames() {
-      var rect = this.props.textRect;
-
-      var _rect = _slicedToArray(rect, 4),
-          x = _rect[0],
-          y = _rect[1],
-          w = _rect[2],
-          h = _rect[3];
-
-      var size = 15;
-
-      var _rectCenter = (0, _pixels.rectCenter)(rect),
-          yCenter = _rectCenter.y;
-
-      var left = [x - size / 2, yCenter - size / 2, size, size];
-      var right = [x + w - size / 2, yCenter - size / 2, size, size];
-      return {
-        left: left,
-        right: right
-      };
-    }
-  }, {
-    key: "getSelectionRects",
-    value: function getSelectionRects() {
-      var _this$props = this.props,
-          textRect = _this$props.textRect,
-          textAttrs = _this$props.textAttrs,
-          text = _this$props.text;
-
-      var _this$getCursors = this.getCursors(),
-          cursor1 = _this$getCursors.cursor1,
-          cursor2 = _this$getCursors.cursor2;
-
-      var _this$getFocusState = this.getFocusState(),
-          isEditing = _this$getFocusState.isEditing;
-
-      if (isEditing && cursor1 >= 0 && cursor2 >= 0) {
-        var rects = (0, _text.findRectsForSelection)(_ctx, textRect, cursor1, cursor2, textAttrs, text);
-
-        if (rects) {
-          return rects.map(function (rect, i) {
-            var x1 = rect.x1,
-                x2 = rect.x2,
-                y1 = rect.y1,
-                y2 = rect.y2;
-            return [x1, y1, x2 - x1, y2 - y1];
-          });
-        }
-      }
-
-      return [];
-    }
-  }, {
-    key: "getCursorCoords",
-    value: function getCursorCoords() {
-      var selRects = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-      var _this$props2 = this.props,
-          textRect = _this$props2.textRect,
-          textAttrs = _this$props2.textAttrs,
-          text = _this$props2.text;
-
-      var _this$getCursors2 = this.getCursors(),
-          cursor = _this$getCursors2.cursor;
-
-      var _this$getFocusState2 = this.getFocusState(),
-          isEditing = _this$getFocusState2.isEditing;
-
-      if (isEditing && selRects.length === 0) {
-        var pos = (0, _text.findPosForCursor)(_ctx, cursor, textRect, textAttrs, text);
-
-        if (pos) {
-          return (0, _text.findCoordsForPos)(_ctx, textRect, textAttrs, text, pos);
-        }
-      }
-    }
-  }, {
-    key: "getFocusState",
-    value: function getFocusState() {
-      var _this$props3 = this.props,
-          focusedPart = _this$props3.focusedPart,
-          isEditing = _this$props3.isEditing;
-      return {
-        isFocused: focusedPart === this.props.part,
-        isEditing: focusedPart === this.props.part && isEditing
-      };
-    }
-  }, {
-    key: "cancelEdit",
-    value: function cancelEdit(e) {
-      if (_keyboard.keys[e.which] === 'escape') {
-        this.props.cancelEditing();
-        e.target.blur();
-      }
-    }
-  }, {
-    key: "handleMouseDown",
-    value: function handleMouseDown(e, mousePos, sub) {
-      this.startPos = mousePos;
-      this.mouseHeld = true;
-
-      if (this.getFocusState().isFocused) {
-        this.mouseDown = new Date();
-      }
-
-      this.props.setFocus();
-    }
-  }, {
-    key: "handleMouseMove",
-    value: function handleMouseMove(e, mousePos) {
-      if (!this.mouseHeld) return;
-      var startPos = this.startPos;
-      var mouseDiff = {
-        x: startPos.x - mousePos.x,
-        y: startPos.y - mousePos.y
-      };
-
-      var _this$getFocusState3 = this.getFocusState(),
-          isFocused = _this$getFocusState3.isFocused,
-          isEditing = _this$getFocusState3.isEditing;
-
-      if (isFocused && !isEditing && !this.snap) {
-        // drag text box
-        var textRect = this.props.textRect;
-        var newRect = (0, _pixels.moveRect)(textRect, mouseDiff);
-        this.props.moveRect(newRect);
-        this.startPos = mousePos;
-      } else if (isFocused && isEditing) {
-        //select text
-        var cursor1 = startPos;
-        var cursor2 = mousePos;
-        var _this$props4 = this.props,
-            _textRect = _this$props4.textRect,
-            textAttrs = _this$props4.textAttrs,
-            text = _this$props4.text;
-        var idx1 = (0, _text.findIdxForCursor)(_ctx, _textRect, cursor1, textAttrs, text);
-        var idx2 = (0, _text.findIdxForCursor)(_ctx, _textRect, cursor2, textAttrs, text);
-        this.props.onAreaSelection(idx1, idx2);
-      }
-    }
-  }, {
-    key: "handleMouseUp",
-    value: function handleMouseUp(e) {
-      if (this.mouseDown && new Date() - this.mouseDown < 200) {
-        var startPos = this.startPos;
-        var _this$props5 = this.props,
-            text = _this$props5.text,
-            textAttrs = _this$props5.textAttrs,
-            textRect = _this$props5.textRect;
-        var cursor = (0, _text.findIdxForCursor)(_ctx, textRect, startPos, textAttrs, text);
-        this.props.onSetCursor(cursor);
-        this.props.setEditing();
-        this.props.onEditEnter();
-      }
-
-      this.mouseDown = null;
-      this.mouseHeld = false;
-    }
-  }, {
     key: "render",
     value: function render() {
-      var _this$getFocusState4 = this.getFocusState(),
-          isFocused = _this$getFocusState4.isFocused,
-          isEditing = _this$getFocusState4.isEditing;
+      var _this2 = this;
 
-      var _this$props6 = this.props,
-          textAttrs = _this$props6.textAttrs,
-          textRect = _this$props6.textRect;
-      var mouseHeld = this.mouseHeld;
-      var selectionRectFrames = this.getSelectionRects();
-      var selectionRects = selectionRectFrames.map(function (frame, i) {
-        return /*#__PURE__*/_react["default"].createElement(_reactKonva.Rect, {
-          key: i,
-          fill: makeBlue(0.5),
-          frame: frame
-        });
-      });
-
-      var _this$getSnapFrames = this.getSnapFrames(),
-          leftSnapFrame = _this$getSnapFrames.left,
-          rightSnapFrame = _this$getSnapFrames.right;
-
-      var cursorCoords = this.getCursorCoords(selectionRects);
-      var outlineColor = mouseHeld ? makeBlue(0.5) : '#0092d1'; // invisible rect to allow text selection/dragging
-
+      var _this$props = this.props,
+          textAttrs = _this$props.textAttrs,
+          textRect = _this$props.textRect;
       return /*#__PURE__*/_react["default"].createElement(_react["default"].Fragment, null, /*#__PURE__*/_react["default"].createElement(_reactKonva.Text, {
         draggable: true,
+        ref: this.shapeRef,
         text: this.state.text,
         fontStyle: textAttrs.bold ? 'bold' : textAttrs.italic ? 'italic' : '',
         fill: textAttrs.color,
         fontSize: textAttrs.fontSize,
         fontFamily: textAttrs.font,
         frame: textRect,
-        x: this.state.x,
-        y: this.state.y,
+        x: textAttrs.x,
+        y: textAttrs.y,
         textAttrs: textAttrs,
         onDblClick: this.handleTextDblClick,
         onDragEnd: this.props.changeSize,
-        onDragStart: this.props.changeSize
+        onDragStart: this.props.changeSize,
+        onTransformEnd: function onTransformEnd(e) {
+          // transformer is changing scale of the node
+          // and NOT its width or height
+          // but in the store we have only width and height
+          // to match the data better we will reset scale on transform end
+          var node = _this2.shapeRef.current;
+          var scaleX = node.scaleX();
+          var scaleY = node.scaleY(); // we will reset it back
+
+          node.scaleX(1);
+          node.scaleY(1);
+          onChange({
+            x: node.x(),
+            y: node.y(),
+            // set minimal value
+            width: Math.max(5, node.width() * scaleX),
+            height: Math.max(node.height() * scaleY)
+          });
+        }
+      }), /*#__PURE__*/_react["default"].createElement(_reactKonva.Transformer, {
+        ref: this.trRef,
+        boundBoxFunc: function boundBoxFunc(oldBox, newBox) {
+          // limit resize
+          if (newBox.width < 5 || newBox.height < 5) {
+            return oldBox;
+          }
+
+          return newBox;
+        }
       }), /*#__PURE__*/_react["default"].createElement(_Portal["default"], null, /*#__PURE__*/_react["default"].createElement("textarea", {
         value: this.state.text,
-        style: {
-          display: this.state.textEditVisible ? 'block' : 'none',
-          position: 'absolute',
-          top: this.state.textareaY + 'px',
-          left: this.state.textareaX + 'px',
-          background: 'transparent',
-          color: 'transparent'
-        },
         onChange: this.handleTextEdit,
         onKeyDown: this.handleTextareaKeyDown
       })));
@@ -76400,221 +75405,6 @@ _defineProperty(_default, "propTypes", {
   setFocus: _propTypes["default"].func.isRequired,
   moveRect: _propTypes["default"].func.isRequired,
   textEditVisible: _propTypes["default"].bool
-});
-});
-
-;require.register("components/TextBoxCursor.jsx", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _react = _interopRequireDefault(require("react"));
-
-var _reactKonva = require("react-konva");
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var _default = /*#__PURE__*/function (_React$Component) {
-  _inherits(_default, _React$Component);
-
-  var _super = _createSuper(_default);
-
-  function _default(props) {
-    var _this;
-
-    _classCallCheck(this, _default);
-
-    _this = _super.call(this, props);
-    _this.state = {
-      show: true
-    };
-    return _this;
-  }
-
-  _createClass(_default, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      this._blink = setInterval(function () {
-        _this2.setState({
-          show: !_this2.state.show
-        });
-      }, 500);
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      clearInterval(this._blink);
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var cursorCoords = this.props.coords;
-      var show = this.state.show;
-      var color = show ? "rgba(255, 255, 255, 0.75)" : "rgba(0,0,0,0)";
-      return /*#__PURE__*/_react["default"].createElement(_reactKonva.Line, {
-        color: color,
-        width: 1,
-        from: [cursorCoords.x, cursorCoords.y1],
-        to: [cursorCoords.x, cursorCoords.y2]
-      });
-    }
-  }]);
-
-  return _default;
-}(_react["default"].Component);
-
-exports["default"] = _default;
-
-_defineProperty(_default, "propTypes", {
-  coords: _propTypes["default"].shape({
-    x: _propTypes["default"].number.isRequired,
-    y1: _propTypes["default"].number.isRequired,
-    y2: _propTypes["default"].number.isRequired
-  }).isRequired
-});
-});
-
-;require.register("components/TextBoxSnap.jsx", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _react = _interopRequireDefault(require("react"));
-
-var _reactKonva = require("react-konva");
-
-var _pixels = require("utils/pixels");
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var MIN_TEXT_WIDTH = 100;
-
-var _default = /*#__PURE__*/function (_React$Component) {
-  _inherits(_default, _React$Component);
-
-  var _super = _createSuper(_default);
-
-  function _default() {
-    _classCallCheck(this, _default);
-
-    return _super.apply(this, arguments);
-  }
-
-  _createClass(_default, [{
-    key: "handleResizeStart",
-    value: function handleResizeStart(e, mousePos) {
-      this.startPos = mousePos;
-      this.mouseHeld = true;
-    }
-  }, {
-    key: "handleResizeMove",
-    value: function handleResizeMove(e, mousePos) {
-      if (!this.mouseHeld) return;
-      var startPos = this.startPos;
-      var mouseDiff = {
-        x: startPos.x - mousePos.x,
-        y: startPos.y - mousePos.y
-      }; // resize text
-
-      var rect = this.props.textRect;
-      var newRect = (0, _pixels.shrinkRect)(rect, this.props.direction, mouseDiff.x);
-      if (newRect[2] <= MIN_TEXT_WIDTH) return;
-      this.props.onMove(newRect);
-      this.startPos = mousePos;
-    }
-  }, {
-    key: "handleResizeEnd",
-    value: function handleResizeEnd() {
-      this.mouseHeld = false;
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this$props = this.props,
-          frame = _this$props.frame,
-          color = _this$props.color;
-      return /*#__PURE__*/_react["default"].createElement(_reactKonva.Rect, {
-        frame: frame,
-        fill: color,
-        mouseSnap: true,
-        onMouseDown: this.handleResizeStart,
-        onMouseMove: this.handleResizeMove,
-        onMouseUp: this.handleResizeEnd
-      });
-    }
-  }]);
-
-  return _default;
-}(_react["default"].Component);
-
-exports["default"] = _default;
-
-_defineProperty(_default, "propTypes", {
-  frame: _propTypes["default"].array.isRequired,
-  textRect: _propTypes["default"].array.isRequired,
-  color: _propTypes["default"].string.isRequired,
-  direction: _propTypes["default"].oneOf(['left', 'right']),
-  onMove: _propTypes["default"].func.isRequired
 });
 });
 
@@ -76837,132 +75627,6 @@ var _default = function _default(Component) {
 exports["default"] = _default;
 });
 
-require.register("components/loadImage.jsx", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _react = _interopRequireDefault(require("react"));
-
-var _imageCache = require("utils/imageCache");
-
-var _useImage3 = _interopRequireDefault(require("use-image"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-var _default = function _default(Component) {
-  var _useImage = (0, _useImage3["default"])('https://konvajs.org/assets/lion.png'),
-      _useImage2 = _slicedToArray(_useImage, 1),
-      images = _useImage2[0];
-
-  return /*#__PURE__*/function (_Component) {
-    _inherits(_class, _Component);
-
-    var _super = _createSuper(_class);
-
-    function _class(props) {
-      var _this;
-
-      _classCallCheck(this, _class);
-
-      _this = _super.call(this, props);
-      _this.state = {};
-      return _this;
-    }
-
-    _createClass(_class, [{
-      key: "loadImage",
-      value: function loadImage(url) {
-        var _this2 = this;
-
-        if (!url) return Promise.resolve();
-        if (this.props.image !== url) this.setState({
-          image: null
-        });
-        return (0, _imageCache.getImage)(url).then(function (img) {
-          _this2.setState({
-            image: img
-          });
-        });
-      }
-    }, {
-      key: "componentDidUpdate",
-      value: function componentDidUpdate(nextProps) {
-        var _this3 = this;
-
-        this.loadImage(nextProps.image).then(function () {
-          return _this3.forceUpdate();
-        });
-      }
-    }, {
-      key: "componentDidMount",
-      value: function componentDidMount() {
-        this.loadImage(this.props.image);
-      }
-    }, {
-      key: "render",
-      value: function render() {
-        var _this$props = this.props,
-            _ = _this$props.image,
-            rest = _objectWithoutProperties(_this$props, ["image"]);
-
-        var image = this.state.image;
-        return /*#__PURE__*/_react["default"].createElement(Component, _extends({
-          image: images
-        }, rest));
-      }
-    }]);
-
-    return _class;
-  }(Component);
-};
-
-exports["default"] = _default;
-});
-
 require.register("container/App.jsx", function(exports, require, module) {
 "use strict";
 
@@ -77040,7 +75704,7 @@ var App = /*#__PURE__*/function (_React$Component) {
         className: "Main"
       }, /*#__PURE__*/_react["default"].createElement("h4", {
         className: "Main-subtitle"
-      }, "Canvas"), /*#__PURE__*/_react["default"].createElement(_ImageCanvas["default"], {
+      }, "Rendu"), /*#__PURE__*/_react["default"].createElement(_ImageCanvas["default"], {
         image: selectedUrl,
         body: {
           text: text,
@@ -77126,11 +75790,7 @@ var _reactRedux = require("react-redux");
 
 var _actions = require("actions");
 
-var _useImage = _interopRequireDefault(require("use-image"));
-
 var _Card = _interopRequireDefault(require("components/Card"));
-
-var _SearchBar = _interopRequireDefault(require("components/SearchBar"));
 
 var _ImagePicker = _interopRequireDefault(require("components/ImagePicker"));
 
@@ -77140,20 +75800,12 @@ var LeftSidebar = function LeftSidebar(_ref) {
   var query = _ref.query,
       availableImages = _ref.availableImages,
       selectedImage = _ref.selectedImage,
-      onSelectImage = _ref.onSelectImage,
-      onSearch = _ref.onSearch,
-      onSearchReset = _ref.onSearchReset,
-      onQueryChange = _ref.onQueryChange;
+      onSelectImage = _ref.onSelectImage;
   return /*#__PURE__*/_react["default"].createElement("div", {
     className: "Sidebar"
   }, /*#__PURE__*/_react["default"].createElement(_Card["default"], {
     title: "Images"
-  }, /*#__PURE__*/_react["default"].createElement(_SearchBar["default"], {
-    query: query,
-    onSearch: onSearch,
-    onSearchReset: onSearchReset,
-    onQueryChange: onQueryChange
-  }), /*#__PURE__*/_react["default"].createElement(_ImagePicker["default"], {
+  }, /*#__PURE__*/_react["default"].createElement(_ImagePicker["default"], {
     images: availableImages,
     selected: selectedImage,
     onSelect: onSelectImage
@@ -77163,8 +75815,7 @@ var LeftSidebar = function LeftSidebar(_ref) {
 var mapStateToProps = function mapStateToProps(state) {
   return {
     availableImages: state.availableImages,
-    selectedImage: state.selectedImage,
-    query: state.query
+    selectedImage: state.selectedImage
   };
 };
 
@@ -77172,15 +75823,6 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   return {
     onSelectImage: function onSelectImage(image) {
       dispatch((0, _actions.selectImage)(image));
-    },
-    onSearch: function onSearch(query) {
-      dispatch((0, _actions.searchImages)(query));
-    },
-    onSearchReset: function onSearchReset() {
-      dispatch((0, _actions.resetSearch)());
-    },
-    onQueryChange: function onQueryChange(query) {
-      dispatch((0, _actions.setQuery)(query));
     }
   };
 };
@@ -77216,8 +75858,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 var RightSidebar = function RightSidebar(_ref) {
   var drawing = _ref.drawing,
-      filter = _ref.filter,
-      onFilterChange = _ref.onFilterChange,
       textAttrs = _ref.textAttrs,
       onFontChange = _ref.onFontChange,
       onFontSizeChange = _ref.onFontSizeChange,
@@ -77272,9 +75912,6 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
     },
     onItalicChange: function onItalicChange(italic) {
       dispatch((0, _actions.setItalic)(italic));
-    },
-    onFilterChange: function onFilterChange(filter) {
-      dispatch((0, _actions.setFilter)(filter));
     },
     onSizeSelect: function onSizeSelect(size) {
       dispatch((0, _actions.setSize)(size));
@@ -77353,7 +75990,7 @@ var initialState = {
   query: "",
   drawing: null,
   size: 'square',
-  text: 'Text',
+  text: 'Exemple de texte',
   textRect: [20, 20, 500 - 40, 500 - 40],
   textAttrs: {
     fontSize: 32,
@@ -77361,7 +75998,9 @@ var initialState = {
     font: 'Georgia',
     bold: false,
     italic: false,
-    lineHeight: 1.35
+    lineHeight: 1.35,
+    x: 150,
+    y: 200
   },
   focused: false,
   editing: false
@@ -77614,1009 +76253,6 @@ function rootSaga() {
 "use strict";
 });
 
-;require.register("utils/canvas.js", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.renderCanvasLayout = void 0;
-
-var _text = require("utils/text");
-
-var _pixels = require("utils/pixels");
-
-var _stackblurCanvas = _interopRequireDefault(require("stackblur-canvas"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-var canvasComponents = {
-  image: function image(ctx, child) {
-    drawImage(ctx, child.frame, child.image);
-  },
-  filter: function filter(ctx, child) {
-    var filter = child.filter,
-        value = child.value;
-    applyFilter(ctx, child.frame, filter, value);
-  },
-  text: function text(ctx, child) {
-    var rect = (0, _text.addText)(ctx, child.textAttrs, child.frame, child.text);
-
-    if (child.frame.join(',') !== rect.join(',')) {
-      child.onUpdateRect && child.onUpdateRect(rect);
-    }
-  },
-  rect: function rect(ctx, child) {
-    ctx.fillStyle = child.fill;
-    ctx.fillRect.apply(ctx, _toConsumableArray(child.frame));
-  },
-  outline: function outline(ctx, child) {
-    ctx.lineWidth = child.width;
-    ctx.strokeStyle = child.color;
-    ctx.strokeRect.apply(ctx, _toConsumableArray(child.frame));
-  },
-  line: function line(ctx, child) {
-    ctx.strokeStyle = child.color;
-    ctx.lineWidth = child.width;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo.apply(ctx, _toConsumableArray(child.from));
-    ctx.lineTo.apply(ctx, _toConsumableArray(child.to));
-    ctx.stroke();
-    ctx.strokeStyle = null;
-  }
-};
-
-var applyFilter = function applyFilter(ctx, frame, name, value) {
-  if (name === 'contrast') {
-    applyContrast(ctx, frame, value);
-  } else {
-    var _frame = _slicedToArray(frame, 4),
-        x = _frame[0],
-        y = _frame[1],
-        w = _frame[2],
-        h = _frame[3];
-
-    var scale = window.devicePixelRatio || 1;
-
-    _stackblurCanvas["default"].canvasRGB(ctx.canvas, x, y, w * scale, h * scale, value);
-  }
-};
-
-var applyContrast = function applyContrast(ctx, frame, value) {
-  ctx.fillStyle = "rgba(45, 45, 45, ".concat(value, ")");
-  ctx.fillRect.apply(ctx, _toConsumableArray(frame));
-};
-
-var drawImage = function drawImage(ctx, frame, img) {
-  var canvasWidth = frame[2];
-  var canvasHeight = frame[3];
-  var area = {
-    width: img.naturalWidth,
-    height: img.naturalHeight
-  };
-  var canvas = {
-    width: frame[2],
-    height: frame[3]
-  };
-
-  var _centerCrop = (0, _pixels.centerCrop)(area, canvas),
-      xPad = _centerCrop.xPad,
-      yPad = _centerCrop.yPad,
-      zoneWidth = _centerCrop.zoneWidth,
-      zoneHeight = _centerCrop.zoneHeight;
-
-  ctx.drawImage(img, xPad, yPad, zoneWidth, zoneHeight, 0, 0, canvasWidth, canvasHeight);
-};
-
-var renderCanvasItems = function renderCanvasItems(ctx, layout) {
-  layout.children.forEach(function (child) {
-    if (!child) return;
-
-    if (child.type === 'group') {
-      renderCanvasItems(ctx, child);
-    } else {
-      var renderer = canvasComponents[child.type];
-      if (!renderer) console.error("Unknown canvas component: ".concat(child.type));
-      ctx.save();
-      renderer(ctx, child);
-      ctx.restore();
-    }
-  });
-};
-
-var renderCanvasLayout = function renderCanvasLayout(ctx, width, height, layout) {
-  ctx.clearRect(0, 0, height, width);
-  renderCanvasItems(ctx, layout);
-};
-
-exports.renderCanvasLayout = renderCanvasLayout;
-});
-
-require.register("utils/debounce.js", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = debounce;
-
-// https://davidwalsh.name/javascript-debounce-function
-function debounce(func, wait, immediate) {
-  var timeout;
-  return function () {
-    var context = this,
-        args = arguments;
-
-    var later = function later() {
-      timeout = null;
-      if (!immediate) func.apply(context, args);
-    };
-
-    var callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) func.apply(context, args);
-  };
-}
-
-;
-});
-
-require.register("utils/imageCache.js", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getImage = void 0;
-var _cache = {};
-
-var _get = function _get(src) {
-  var img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.src = src;
-  return new Promise(function (resolve, reject) {
-    img.onload = function () {
-      return resolve(img);
-    };
-  });
-};
-
-var getImage = function getImage(src) {
-  if (src in _cache) {
-    return _cache[src];
-  } else {
-    var img = _get(src);
-
-    _cache[src] = img;
-    return img;
-  }
-};
-
-exports.getImage = getImage;
-});
-
-require.register("utils/keyboard.js", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.keys = void 0;
-var keys = {
-  8: 'backspace',
-  27: 'escape',
-  37: 'arr_left',
-  39: 'arr_right'
-};
-exports.keys = keys;
-});
-
-require.register("utils/objectCanvas.js", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.CSurface = exports.CGroup = exports.CPrimitive = void 0;
-
-var _canvas = require("utils/canvas");
-
-var _pixels = require("utils/pixels");
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var CNode = /*#__PURE__*/function () {
-  function CNode() {
-    _classCallCheck(this, CNode);
-
-    this._props = {};
-    this.parentNode = null;
-  }
-
-  _createClass(CNode, [{
-    key: "setProps",
-    value: function setProps(props) {
-      this._props = props;
-    }
-  }, {
-    key: "canHandleMouseEvents",
-    value: function canHandleMouseEvents() {
-      return false;
-    }
-  }]);
-
-  return CNode;
-}();
-
-var CPrimitive = /*#__PURE__*/function (_CNode) {
-  _inherits(CPrimitive, _CNode);
-
-  var _super = _createSuper(CPrimitive);
-
-  function CPrimitive(type) {
-    var _this;
-
-    _classCallCheck(this, CPrimitive);
-
-    _this = _super.call(this);
-    _this.type = type;
-    return _this;
-  }
-
-  _createClass(CPrimitive, [{
-    key: "canHandleMouseEvents",
-    value: function canHandleMouseEvents() {
-      return this.type === 'rect' || this.type === 'image';
-    }
-  }, {
-    key: "toJSONDesc",
-    value: function toJSONDesc() {
-      return Object.assign({
-        type: this.type
-      }, this._props);
-    }
-  }]);
-
-  return CPrimitive;
-}(CNode);
-
-exports.CPrimitive = CPrimitive;
-
-var CGroup = /*#__PURE__*/function (_CNode2) {
-  _inherits(CGroup, _CNode2);
-
-  var _super2 = _createSuper(CGroup);
-
-  function CGroup() {
-    var _this2;
-
-    _classCallCheck(this, CGroup);
-
-    _this2 = _super2.call(this);
-    _this2._children = [];
-    return _this2;
-  }
-
-  _createClass(CGroup, [{
-    key: "exists",
-    value: function exists(node) {
-      return this._children.indexOf(node) !== -1;
-    }
-  }, {
-    key: "insertFirst",
-    value: function insertFirst(node) {
-      if (this.exists(node)) return;
-      node.parentNode = this;
-
-      this._children.unshift(node);
-    }
-  }, {
-    key: "insertAfter",
-    value: function insertAfter(referenceNode, node) {
-      var index = this._children.indexOf(node);
-
-      var exists = index !== -1;
-
-      var refIndex = this._children.indexOf(referenceNode);
-
-      if (exists) {
-        // move
-        this._children.splice(refIndex + 1, 0, this._children.splice(index, 1)[0]);
-      } else {
-        // insert
-        node.parentNode = this;
-
-        this._children.splice(refIndex + 1, 0, node);
-      }
-    }
-  }, {
-    key: "ejectChild",
-    value: function ejectChild(node) {
-      var index = this._children.indexOf(node);
-
-      this._children.splice(index, 1);
-
-      node.parentNode = null;
-    }
-  }, {
-    key: "toJSONDesc",
-    value: function toJSONDesc() {
-      return {
-        type: 'group',
-        children: this._children.map(function (x) {
-          return x.toJSONDesc();
-        })
-      };
-    }
-  }]);
-
-  return CGroup;
-}(CNode);
-
-exports.CGroup = CGroup;
-
-var CSurface = /*#__PURE__*/function (_CGroup) {
-  _inherits(CSurface, _CGroup);
-
-  var _super3 = _createSuper(CSurface);
-
-  function CSurface(width, height, domNode) {
-    var _this3;
-
-    _classCallCheck(this, CSurface);
-
-    _this3 = _super3.call(this);
-    _this3.domNode = domNode;
-
-    _this3.setDim(width, height);
-
-    return _this3;
-  }
-
-  _createClass(CSurface, [{
-    key: "setDim",
-    value: function setDim(width, height) {
-      this.width = width;
-      this.height = height;
-      this.scaleCanvas();
-    }
-  }, {
-    key: "scaleCanvas",
-    value: function scaleCanvas() {
-      var node = this.domNode;
-      var width = this.width,
-          height = this.height;
-      var ctx = node.getContext('2d');
-      var scale = window.devicePixelRatio || 1;
-      node.width = width * scale;
-      node.height = height * scale;
-      node.style.width = width + 'px';
-      node.style.height = height + 'px';
-      ctx.scale(scale, scale);
-    }
-  }, {
-    key: "findNodesInPoint",
-    value: function findNodesInPoint(_ref) {
-      var x = _ref.x,
-          y = _ref.y;
-
-      var childrenOrSelf = function childrenOrSelf(x) {
-        if (x._children) {
-          return x._children.map(childrenOrSelf).reduce(function (acc, y) {
-            return acc.concat(y);
-          }, []);
-        }
-
-        return [x];
-      };
-
-      var inPoint = childrenOrSelf(this).filter(function (x) {
-        return x._props.frame && x.canHandleMouseEvents();
-      }).filter(function (_) {
-        return (0, _pixels.isInRect)({
-          x: x,
-          y: y
-        }, _._props.frame);
-      });
-      return inPoint;
-    }
-  }, {
-    key: "findHandlerForEvent",
-    value: function findHandlerForEvent(point, type) {
-      var nodes = this.findNodesInPoint(point).filter(function (x) {
-        return x._props[type];
-      });
-      return nodes.slice(-1)[0];
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var ctx = this.domNode.getContext('2d');
-      (0, _canvas.renderCanvasLayout)(ctx, this.width, this.height, this.toJSONDesc());
-    }
-  }]);
-
-  return CSurface;
-}(CGroup);
-
-exports.CSurface = CSurface;
-});
-
-;require.register("utils/pixels.js", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getMousePos = exports.centerCrop = exports.diffWithin = exports.pointDiff = exports.shrinkRect = exports.moveRect = exports.isInRect = exports.rectCenter = void 0;
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-var rectCenter = function rectCenter(_ref) {
-  var _ref2 = _slicedToArray(_ref, 4),
-      x = _ref2[0],
-      y = _ref2[1],
-      w = _ref2[2],
-      h = _ref2[3];
-
-  return {
-    x: x + w / 2,
-    y: y + h / 2
-  };
-};
-
-exports.rectCenter = rectCenter;
-
-var isInRect = function isInRect(pos, rect) {
-  return pos.x >= rect[0] && pos.x <= rect[0] + rect[2] && pos.y >= rect[1] && pos.y <= rect[1] + rect[3];
-};
-
-exports.isInRect = isInRect;
-
-var moveRect = function moveRect(rect, diff) {
-  var _rect = _slicedToArray(rect, 4),
-      x = _rect[0],
-      y = _rect[1],
-      w = _rect[2],
-      h = _rect[3];
-
-  return [x - diff.x, y - diff.y, w, h];
-};
-
-exports.moveRect = moveRect;
-
-var shrinkRect = function shrinkRect(rect, dir, value) {
-  var _rect2 = _slicedToArray(rect, 4),
-      x = _rect2[0],
-      y = _rect2[1],
-      w = _rect2[2],
-      h = _rect2[3];
-
-  return dir === 'left' ? [x - value, y, w + value, h] : [x, y, w - value, h];
-};
-
-exports.shrinkRect = shrinkRect;
-
-var pointDiff = function pointDiff(a, b) {
-  var xDiff = a.x - b.x;
-  var yDiff = a.y - b.y;
-  return {
-    xDiff: xDiff,
-    yDiff: yDiff
-  };
-};
-
-exports.pointDiff = pointDiff;
-
-var diffWithin = function diffWithin(a, b, _ref3) {
-  var x = _ref3.x,
-      y = _ref3.y;
-
-  var _pointDiff = pointDiff(a, b),
-      xDiff = _pointDiff.xDiff,
-      yDiff = _pointDiff.yDiff;
-
-  return {
-    xWithin: xDiff >= -x && xDiff <= x,
-    yWithin: yDiff >= -y && yDiff <= y
-  };
-};
-
-exports.diffWithin = diffWithin;
-
-var centerCrop = function centerCrop(area, frame) {
-  var imgWidth = area.width,
-      imgHeight = area.height;
-  var canvasWidth = frame.width,
-      canvasHeight = frame.height;
-  var origRatio = imgWidth / imgHeight;
-  var canvasRatio = canvasWidth / canvasHeight; // determine crop
-
-  var zoneWidth, zoneHeight;
-
-  if (canvasRatio >= origRatio) {
-    zoneWidth = imgWidth;
-    zoneHeight = imgWidth / canvasRatio;
-  } else {
-    zoneWidth = imgHeight * canvasRatio;
-    zoneHeight = imgHeight;
-  } // center
-
-
-  var xPad = (imgWidth - zoneWidth) / 2;
-  var yPad = (imgHeight - zoneHeight) / 2;
-  return {
-    xPad: xPad,
-    yPad: yPad,
-    zoneWidth: zoneWidth,
-    zoneHeight: zoneHeight
-  };
-};
-
-exports.centerCrop = centerCrop;
-
-var getMousePos = function getMousePos(e, canvas) {
-  var rect = canvas.getBoundingClientRect();
-  var mousePos = {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top
-  };
-  return mousePos;
-};
-
-exports.getMousePos = getMousePos;
-});
-
-require.register("utils/text.js", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.addText = exports.findRectsForSelection = exports.findCoordsForPos = exports.findPosForCursor = exports.coordsForLine = exports.findIdxForCursor = exports.splitTextInLines = void 0;
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-var BOX_MARGIN = 5;
-var BOX_TOTAL_MARGIN = 2 * BOX_MARGIN;
-
-var setupCtx = function setupCtx(ctx, textAttrs) {
-  var bold = textAttrs.bold,
-      italic = textAttrs.italic,
-      font = textAttrs.font,
-      fontSize = textAttrs.fontSize,
-      color = textAttrs.color;
-  ctx.font = "".concat(bold ? 'bold' : '', " ").concat(italic ? 'italic' : '', " ").concat(fontSize, "px \"").concat(font, "\"");
-  ctx.fillStyle = color;
-};
-
-var splitTextInLines = function splitTextInLines(ctx, maxWidth, textAttrs, text) {
-  var fontSize = textAttrs.fontSize;
-  maxWidth = maxWidth - BOX_TOTAL_MARGIN;
-  setupCtx(ctx, textAttrs);
-  var paras = text.split('\n');
-  var words = paras.map(function (para) {
-    return para.split(' ');
-  }).reduce(function (acc, words, idx) {
-    var a = idx == paras.length - 1 ? [] : ['\n'];
-    return acc.concat(words).concat(a);
-  }, []);
-  var lines = [''];
-  var indices = [[]];
-  var lastGlobIdx = 0;
-  words.forEach(function (word, idx) {
-    if (word === '\n') {
-      indices.push([]);
-      lines.push('');
-      return;
-    }
-
-    var lastIdx = lines.length - 1;
-    var lastLine = lines[lastIdx];
-    var newText = lastLine.length === 0 ? word : lastLine + ' ' + word;
-
-    if (ctx.measureText(newText).width <= maxWidth || lastLine.length === 0) {
-      lines[lastIdx] = newText;
-      var empty = lastLine.length === 0;
-      indices[lastIdx] = indices[lastIdx].concat(word.split('').map(function (_, i) {
-        return lastGlobIdx + 1 + i;
-      }));
-    } else {
-      indices.push(word.split('').map(function (_, i) {
-        return lastGlobIdx + 1 + i;
-      }));
-      lines.push(word);
-    }
-
-    indices[lines.length - 1].push(lastGlobIdx + 1 + word.length);
-    lastGlobIdx = lastGlobIdx + 1 + word.length;
-  });
-  return [lines, indices];
-};
-
-exports.splitTextInLines = splitTextInLines;
-
-var findIdxForCursor = function findIdxForCursor(ctx, textRect, cursorAt, textAttrs, text) {
-  var fontSize = textAttrs.fontSize,
-      lineHeight = textAttrs.lineHeight;
-  setupCtx(ctx, textAttrs);
-  var maxWidth = textRect[2];
-
-  var _splitTextInLines = splitTextInLines(ctx, maxWidth, textAttrs, text),
-      _splitTextInLines2 = _slicedToArray(_splitTextInLines, 2),
-      lines = _splitTextInLines2[0],
-      mapIndices = _splitTextInLines2[1];
-
-  var spaced = fontSize * lineHeight;
-  var cursor;
-  lines.forEach(function (line, idx) {
-    var x = textRect[0] + BOX_MARGIN;
-    var y = textRect[1] + fontSize + idx * spaced; // find cursor
-
-    if (cursorAt && cursorAt.y <= y && cursorAt.y >= y - spaced) {
-      line.split('').forEach(function (_char, idx) {
-        var wd0 = ctx.measureText(line.slice(0, idx)).width;
-        var wd1 = ctx.measureText(line.slice(0, idx + 1)).width;
-        var curX = cursorAt.x - x;
-
-        if (curX >= wd0 && curX <= wd1) {
-          cursor = text.indexOf(line) + idx;
-        }
-      });
-    }
-  });
-  return cursor !== undefined ? cursor + 1 : null;
-};
-
-exports.findIdxForCursor = findIdxForCursor;
-
-var coordsForLine = function coordsForLine(textRect, textAttrs, lineNo) {
-  var fontSize = textAttrs.fontSize,
-      lineHeight = textAttrs.lineHeight;
-  var spaced = fontSize * lineHeight;
-  return {
-    x: textRect[0] + BOX_MARGIN,
-    y: textRect[1] + fontSize + lineNo * spaced
-  };
-};
-
-exports.coordsForLine = coordsForLine;
-
-var findPosForCursor = function findPosForCursor(ctx, cursor, textRect, textAttrs, text) {
-  var fontSize = textAttrs.fontSize;
-  setupCtx(ctx, textAttrs);
-  var maxWidth = textRect[2];
-
-  var _splitTextInLines3 = splitTextInLines(ctx, maxWidth, fontSize, text),
-      _splitTextInLines4 = _slicedToArray(_splitTextInLines3, 2),
-      lines = _splitTextInLines4[0],
-      mapIndices = _splitTextInLines4[1];
-
-  if (cursor === 0) {
-    return {
-      lineNo: 0,
-      idxInLine: 0,
-      line: ['']
-    };
-  }
-
-  ;
-  var line = mapIndices.find(function (line) {
-    return line.indexOf(cursor) !== -1;
-  });
-  var pos;
-
-  if (line) {
-    var lineNo = mapIndices.indexOf(line);
-    var idxInLine = line.indexOf(cursor);
-    var lineText = line.map(function (i) {
-      return text[i - 1];
-    }).join('');
-    pos = {
-      lineNo: lineNo,
-      idxInLine: idxInLine,
-      line: line
-    };
-  }
-
-  return pos;
-};
-
-exports.findPosForCursor = findPosForCursor;
-
-var findCoordsForPos = function findCoordsForPos(ctx, textRect, textAttrs, text, pos) {
-  var fontSize = textAttrs.fontSize;
-  setupCtx(ctx, textAttrs);
-  var lineNo = pos.lineNo,
-      idxInLine = pos.idxInLine,
-      line = pos.line;
-  var lineText = line.map(function (i) {
-    return text[i - 1];
-  }).join('');
-
-  var _coordsForLine = coordsForLine(textRect, textAttrs, lineNo),
-      x = _coordsForLine.x,
-      y = _coordsForLine.y;
-
-  var wd1 = ctx.measureText(lineText.slice(0, idxInLine + 1)).width;
-  return {
-    x: x + wd1,
-    y1: y - fontSize + 7,
-    y2: y + 7
-  };
-};
-
-exports.findCoordsForPos = findCoordsForPos;
-
-var findRectsForSelection = function findRectsForSelection(ctx, textRect, cursor1, cursor2, textAttrs, text) {
-  var fontSize = textAttrs.fontSize;
-  setupCtx(ctx, textAttrs);
-  var idx1 = cursor1;
-  var idx2 = cursor2;
-
-  if (idx1 > idx2) {
-    var _ref = [idx2, idx1];
-    idx1 = _ref[0];
-    idx2 = _ref[1];
-  }
-
-  var pos1 = findPosForCursor(ctx, idx1, textRect, textAttrs, text);
-  var pos2 = findPosForCursor(ctx, idx2, textRect, textAttrs, text);
-  if (!(pos1 && pos2)) return;
-
-  var _splitTextInLines5 = splitTextInLines(ctx, textRect[2], textAttrs, text),
-      _splitTextInLines6 = _slicedToArray(_splitTextInLines5, 2),
-      lines = _splitTextInLines6[0],
-      mapIndices = _splitTextInLines6[1];
-
-  if (pos1.lineNo === pos2.lineNo) {
-    var line = mapIndices.find(function (line) {
-      return line.indexOf(idx1 + 1) !== -1;
-    });
-    var lineText = line.map(function (i) {
-      return text[i - 1];
-    }).join('');
-
-    var _coordsForLine2 = coordsForLine(textRect, textAttrs, pos1.lineNo),
-        x = _coordsForLine2.x,
-        y = _coordsForLine2.y;
-
-    var wd1 = ctx.measureText(lineText.slice(0, pos1.idxInLine)).width;
-    var wd2 = ctx.measureText(lineText.slice(pos1.idxInLine, pos2.idxInLine)).width;
-    return [{
-      x1: x + wd1,
-      x2: x + wd1 + wd2,
-      y1: y - fontSize + 7,
-      y2: y + 7
-    }];
-  } else {
-    var lineNos = Array.apply(0, Array(pos2.lineNo - pos1.lineNo + 1)).map(function (_, idx) {
-      return idx + pos1.lineNo;
-    });
-    return lineNos.map(function (lineNo) {
-      var _coordsForLine3 = coordsForLine(textRect, textAttrs, lineNo),
-          x = _coordsForLine3.x,
-          y = _coordsForLine3.y;
-
-      var wd1, wd2;
-
-      if (lineNo == pos1.lineNo) {
-        var _line = mapIndices.find(function (line) {
-          return line.indexOf(idx1 + 1) !== -1;
-        });
-
-        var _lineText = _line.map(function (i) {
-          return text[i - 1];
-        }).join('');
-
-        wd1 = ctx.measureText(_lineText.slice(0, pos1.idxInLine)).width;
-        wd2 = ctx.measureText(_lineText.slice(pos1.idxInLine)).width;
-      } else if (lineNo === pos2.lineNo) {
-        var _line2 = mapIndices.find(function (line) {
-          return line.indexOf(idx2) !== -1;
-        });
-
-        var _lineText2 = _line2.map(function (i) {
-          return text[i - 1];
-        }).join('');
-
-        wd1 = 0;
-        wd2 = ctx.measureText(_lineText2.slice(0, pos2.idxInLine)).width;
-      } else {
-        var _line3 = mapIndices[lineNo];
-
-        var _lineText3 = _line3.map(function (i) {
-          return text[i - 1];
-        }).join('');
-
-        wd1 = 0;
-        wd2 = ctx.measureText(_lineText3).width;
-      }
-
-      return {
-        x1: x + wd1,
-        x2: x + wd1 + wd2,
-        y1: y - fontSize + 7,
-        y2: y + 7
-      };
-    });
-  }
-};
-
-exports.findRectsForSelection = findRectsForSelection;
-
-var addText = function addText(ctx, textAttrs, _textRect, text) {
-  var fontSize = textAttrs.fontSize,
-      lineHeight = textAttrs.lineHeight;
-  setupCtx(ctx, textAttrs);
-
-  var textRect = _textRect.slice();
-
-  var maxWidth = _textRect[2] - BOX_TOTAL_MARGIN;
-
-  var _splitTextInLines7 = splitTextInLines(ctx, maxWidth, textAttrs, text),
-      _splitTextInLines8 = _slicedToArray(_splitTextInLines7, 2),
-      lines = _splitTextInLines8[0],
-      mapIndices = _splitTextInLines8[1];
-
-  var spaced = fontSize * lineHeight;
-  lines.forEach(function (line, idx) {
-    var _coordsForLine4 = coordsForLine(textRect, textAttrs, idx),
-        x = _coordsForLine4.x,
-        y = _coordsForLine4.y;
-
-    ctx.fillText(line, x, y, maxWidth);
-  });
-  var totalHeight = lines.length * spaced;
-  textRect[3] = totalHeight;
-  return textRect;
-};
-
-exports.addText = addText;
-});
-
-require.register("utils/textEditor.js", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _react = _interopRequireDefault(require("react"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-var _default = /*#__PURE__*/function (_React$Component) {
-  _inherits(_default, _React$Component);
-
-  var _super = _createSuper(_default);
-
-  function _default(props) {
-    var _this;
-
-    _classCallCheck(this, _default);
-
-    _this = _super.call(this, props);
-    _this.state = {
-      start: 0,
-      end: 0
-    };
-    return _this;
-  }
-
-  _createClass(_default, [{
-    key: "setFromInput",
-    value: function setFromInput(selectionStart, selectionEnd) {
-      this.start = selectionStart;
-      this.end = selectionEnd;
-    }
-  }, {
-    key: "setSelection",
-    value: function setSelection(idx1, idx2, txt) {
-      this.start = idx1;
-      this.end = idx2;
-      txt.setSelectionRange(idx1, idx2);
-    }
-  }, {
-    key: "setCursor",
-    value: function setCursor(idx, txt) {
-      this.start = idx || 0;
-      this.end = idx || 0;
-      txt.setSelectionRange(this.start, this.end);
-    }
-  }]);
-
-  return _default;
-}(_react["default"].Component);
-
-exports["default"] = _default;
-});
-
 ;require.register("utils/unsplash.js", function(exports, require, module) {
 "use strict";
 
@@ -78683,7 +76319,6 @@ require.alias("react-konva/lib/ReactKonva.js", "react-konva");
 require.alias("react-redux/lib/index.js", "react-redux");
 require.alias("redux/lib/redux.js", "redux");
 require.alias("redux-saga/lib/index.js", "redux-saga");
-require.alias("stackblur-canvas/dist/stackblur.js", "stackblur-canvas");
 require.alias("symbol-observable/lib/index.js", "symbol-observable");require.register("___globals___", function(exports, require, module) {
   
 });})();require('___globals___');

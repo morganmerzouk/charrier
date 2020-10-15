@@ -20,7 +20,7 @@ export class App extends React.Component {
       <div className="Container">
         <LeftSidebar />
         <div className="Main">
-          <h4 className="Main-subtitle">Canvas</h4>
+          <h4 className="Main-subtitle">Rendu</h4>
           <ImageCanvas
             image={selectedUrl}
             body={{

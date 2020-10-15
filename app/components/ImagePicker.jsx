@@ -24,7 +24,7 @@ export default class extends React.Component {
 
             return <div className={className} onClick={this.handleSelect.bind(this, image)} key={image.url}>
               <Option selected={sel} borderStyle="thick-transparent">
-                  <img src={imageUrl}/ >
+                  <img src={imageUrl} crossOrigin="anonymous" / >
               </Option>
             </div>;
           })}

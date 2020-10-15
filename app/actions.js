@@ -69,17 +69,3 @@ export const cacheDrawing = (drawing) => ({
   type: 'CACHE_DRAWING',
   drawing
 });
-
-export const setQuery = (query) => ({
-  type: 'SET_QUERY',
-  query
-});
-
-export const searchImages = (query) => ({
-  type: 'SEARCH_IMAGES',
-  query
-});
-
-export const resetSearch = () => ({
-  type: 'RESET_SEARCH'
-});

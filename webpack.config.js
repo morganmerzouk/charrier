@@ -61,7 +61,7 @@ const config = {
     extensions: ['', '.js', '.jsx']
   },
   plugins: [
-    new HtmlWebpackPlugin({title: 'Pabla'}),
+    new HtmlWebpackPlugin({title: 'Charrier - Prototype'}),
     new webpack.HotModuleReplacementPlugin({multiStep: true}),
     new webpack.optimize.UglifyJsPlugin({
       compress: {warnings: false}

@@ -9,7 +9,7 @@ const initialState = {
   query: "",
   drawing: null,
   size: 'square',
-  text: 'Text',
+  text: 'Exemple de texte',
   textRect: [20, 20, 500 - 40, 500 - 40],
   textAttrs: {
     fontSize: 32,
@@ -17,7 +17,9 @@ const initialState = {
     font: 'Georgia',
     bold: false,
     italic: false,
-    lineHeight: 1.35
+    lineHeight: 1.35,
+    x: 150,
+    y: 200,
   },
   focused: false,
   editing: false
