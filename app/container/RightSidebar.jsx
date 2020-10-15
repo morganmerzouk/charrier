@@ -3,7 +3,6 @@ import {connect} from 'react-redux';
 import {setFilter, setFont, setFontSize, setColor, setBold, setItalic, setSize} from 'actions';
 
 import Card from 'components/Card';
-import FiltersPicker from 'components/FiltersPicker';
 import TextPropertiesPicker from 'components/TextPropertiesPicker';
 import SizePicker from 'components/SizePicker';
 import DownloadButton from 'components/DownloadButton';
@@ -12,9 +11,6 @@ const RightSidebar = ({ drawing, filter, onFilterChange, textAttrs, onFontChange
   return <div className="Sidebar">
     <Card title="Sizes">
       <SizePicker size={size} onSizeSelect={onSizeSelect} />
-    </Card>
-    <Card title="Filters">
-      <FiltersPicker filter={filter} onFilterChange={onFilterChange} />
     </Card>
     <Card title="Text">
       <TextPropertiesPicker
@@ -26,10 +22,6 @@ const RightSidebar = ({ drawing, filter, onFilterChange, textAttrs, onFontChange
         onItalicChange={onItalicChange} />
     </Card>
     <DownloadButton drawing={drawing} />
-    <p className="Credit">
-      Made by <a href="http://goshakkk.name">Gosha Arinich</a>. <a href="https://github.com/goshakkk/pabla">Repo</a>.
-      Learn about rendering to canvas with React <a href="http://goshakkk.name/react-custom-renderers/">here</a>.
-    </p>
   </div>;
 };
 

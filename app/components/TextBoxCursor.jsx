@@ -1,34 +1,41 @@
 import React from 'react';
-import {CanvasLine} from './Canvas';
+import { Line } from 'react-konva';
 
-export default React.createClass({
-  propTypes: {
-    coords: React.PropTypes.shape({
-      x: React.PropTypes.number.isRequired,
-      y1: React.PropTypes.number.isRequired,
-      y2: React.PropTypes.number.isRequired
-    }).isRequired
-  },
+import PropTypes from 'prop-types';
 
-  getInitialState() {
-    return { show: true };
-  },
+export default class extends React.Component { 
+
+    static propTypes = {
+        coords: PropTypes.shape({
+          x: PropTypes.number.isRequired,
+          y1: PropTypes.number.isRequired,
+          y2: PropTypes.number.isRequired
+        }).isRequired
+    };
+
+    constructor(props) {
+        super(props);
+        this.state = {
+          show: true,
+        };
+    }  
+
 
   componentDidMount() {
     this._blink = setInterval(() => {
       this.setState({ show: !this.state.show });
     }, 500);
-  },
+  }
 
   componentWillUnmount() {
     clearInterval(this._blink);
-  },
+  }
 
   render() {
     const {coords: cursorCoords} = this.props;
     const {show} = this.state;
 
     const color = show ? "rgba(255, 255, 255, 0.75)" : "rgba(0,0,0,0)";
-    return <CanvasLine color={color} width={1} from={[cursorCoords.x, cursorCoords.y1]} to={[cursorCoords.x, cursorCoords.y2]} />;
+    return <Line color={color} width={1} from={[cursorCoords.x, cursorCoords.y1]} to={[cursorCoords.x, cursorCoords.y2]} />;
   }
-});
+}

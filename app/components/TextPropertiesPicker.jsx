@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Option from './Option';
 
 const colors = [
@@ -13,41 +14,42 @@ const colors = [
 const fonts = ['Arial', 'Georgia', 'Helvetica', 'Trebuchet MS'];
 const fontSizes = [8, 10, 12, 14, 16, 18, 20, 22, 26, 32, 36, 42, 48, 54];
 
-export default React.createClass({
-  propTypes: {
-    textAttrs: React.PropTypes.shape({
-      font: React.PropTypes.string.isRequired,
-      fontSize: React.PropTypes.number.isRequired,
-      color: React.PropTypes.string.isRequired,
-      bold: React.PropTypes.bool.isRequired,
-      italic: React.PropTypes.bool.isRequired,
-    }).isRequired,
-    onFontChange: React.PropTypes.func.isRequired,
-    onFontSizeChange: React.PropTypes.func.isRequired,
-    onColorChange: React.PropTypes.func.isRequired
-  },
+export default class extends React.Component {  
+
+  static propTypes = {
+      textAttrs: PropTypes.shape({
+        font: PropTypes.string.isRequired,
+        fontSize: PropTypes.number.isRequired,
+        color: PropTypes.string.isRequired,
+        bold: PropTypes.bool.isRequired,
+        italic: PropTypes.bool.isRequired,
+      }).isRequired,
+      onFontChange: PropTypes.func.isRequired,
+      onFontSizeChange: PropTypes.func.isRequired,
+      onColorChange: PropTypes.func.isRequired
+  };
 
   updateFont() {
     const val = this.refs.font.value;
     this.props.onFontChange(val);
-  },
+  }
 
   updateFontSize() {
     const val = parseInt(this.refs.fontSize.value, 10);
     this.props.onFontSizeChange(val);
-  },
+  }
 
   updateColor(color) {
     this.props.onColorChange(color);
-  },
+  }
 
   updateBold() {
     this.props.onBoldChange(!this.props.textAttrs.bold);
-  },
+  }
 
   updateItalic() {
     this.props.onItalicChange(!this.props.textAttrs.italic);
-  },
+  }
 
   render() {
     const {font, fontSize, color, bold, italic} = this.props.textAttrs;
@@ -89,4 +91,4 @@ export default React.createClass({
       </div>
     </div>;
   }
-});
+}

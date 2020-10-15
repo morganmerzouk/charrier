@@ -8,8 +8,8 @@ module.exports = {
 
   plugins: {
     babel: {
-      presets: ['es2015', 'react', 'stage-0'],
-      plugins: ['syntax-object-rest-spread']
+      presets: ["@babel/preset-react", "@babel/preset-env"],
+      plugins: ['syntax-object-rest-spread',  '@babel/plugin-syntax-class-properties', '@babel/plugin-proposal-class-properties']
     },
 
     postcss: {

@@ -6,14 +6,15 @@ import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 import ImageCanvas from 'components/ImageCanvas';
 
-const App = React.createClass({
+export class App extends React.Component {
   updateDrawnImage(data) {
     if (this.props.drawing === data) return;
     this.props.onCacheDrawing(data);
-  },
+  }
 
   render() {
     const selectedUrl = this.props.selected && this.props.selected.url;
+    
     const {text, textRect, textAttrs, filter, size} = this.props;
     return (
       <div className="Container">
@@ -25,7 +26,6 @@ const App = React.createClass({
             body={{
               text, textAttrs, textRect
             }}
-            filter={filter}
             size={size}
             isFocused={this.props.focused}
             isEditing={this.props.editing}
@@ -41,7 +41,7 @@ const App = React.createClass({
       </div>
     );
   }
-});
+}
 
 const mapStateToProps = (state) => ({
   textAttrs: state.textAttrs,

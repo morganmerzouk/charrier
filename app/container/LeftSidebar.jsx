@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {selectImage, searchImages, resetSearch, setQuery} from 'actions';
+import useImage from 'use-image';
 
 import Card from 'components/Card';
 import SearchBar from 'components/SearchBar';

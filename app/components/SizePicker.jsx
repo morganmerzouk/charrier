@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Option from './Option';
 
 const SizeItem = ({ name, code, currentCode, onSelect }) => {
@@ -15,12 +16,11 @@ const SizeItem = ({ name, code, currentCode, onSelect }) => {
   </div>
 };
 
-export default React.createClass({
-  propTypes: {
-    size: React.PropTypes.oneOf(['tall', 'square', 'wide']).isRequired,
-    onSizeSelect: React.PropTypes.func.isRequired
-  },
-
+export default class extends React.Component {
+  static propTypes = {
+      size: PropTypes.oneOf(['tall', 'square', 'wide']).isRequired,
+      onSizeSelect: PropTypes.func.isRequired
+  };
   render() {
     const {size, onSizeSelect} = this.props;
 
@@ -30,4 +30,5 @@ export default React.createClass({
       <SizeItem name="Wide" code="wide" currentCode={size} onSelect={onSizeSelect} />
     </div>;
   }
-});
+}
+
