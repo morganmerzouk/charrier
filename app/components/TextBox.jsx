@@ -6,13 +6,10 @@ import {findIdxForCursor, findPosForCursor, findCoordsForPos, findRectsForSelect
 import {keys} from 'utils/keyboard';
 import {rectCenter, moveRect} from 'utils/pixels';
 import PropTypes from 'prop-types';
-
-const _ctx = document.createElement('canvas').getContext('2d');
-
-const makeBlue = (alpha) => `rgba(87, 205, 255, ${alpha})`;
+import Portal from './Portal';
 
 export default class extends React.Component {
-
+    
     static propTypes = {
         text: PropTypes.string.isRequired,
         textAttrs: PropTypes.object.isRequired,
@@ -22,8 +19,17 @@ export default class extends React.Component {
         part: PropTypes.string.isRequired,
         cancelEditing: PropTypes.func.isRequired,
         setFocus: PropTypes.func.isRequired,
-        moveRect: PropTypes.func.isRequired
+        moveRect: PropTypes.func.isRequired,
+        textEditVisible: PropTypes.bool,
     };
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            textEditVisible: false,
+            text: props.text
+        };
+    }
 
     getCursors() {
         return this.props.selection;
@@ -139,9 +145,32 @@ export default class extends React.Component {
         this.mouseHeld = false;
     }
 
+    handleTextDblClick = e => {
+        const canvasCoords = document.getElementsByTagName("canvas")[0].getBoundingClientRect();
+        const absPos = e.target.getAbsolutePosition();
+        
+        this.setState({
+            textEditVisible: true,
+            textareaX: canvasCoords.x + absPos.x,
+            textareaY: canvasCoords.y + absPos.y
+        });
+    }
+    handleTextEdit = e => {
+        this.setState({
+            text: e.target.value
+        });
+    }
+    handleTextareaKeyDown = e => {
+        if (e.keyCode === 13) {
+            this.setState({
+                textEditVisible: false
+            });
+        }
+    }
+
     render() {
         const {isFocused, isEditing} = this.getFocusState();
-        const {text, textAttrs, textRect} = this.props;
+        const {textAttrs, textRect} = this.props;
         const {mouseHeld} = this;
 
         const selectionRectFrames = this.getSelectionRects();
@@ -154,40 +183,39 @@ export default class extends React.Component {
         const outlineColor = mouseHeld ? makeBlue(0.5) : '#0092d1';
 
         // invisible rect to allow text selection/dragging
-        return <Group>
-            <Rect
-            frame={textRect}
-            fill="rgba(0,0,0,0)"
-            mouseSnap={true}
-            onMouseDown={this.handleMouseDown}
-            onMouseMove={this.handleMouseMove}
-            onMouseUp={this.handleMouseUp} />
-            {isFocused ?
-            <Snap frame={leftSnapFrame} textRect={textRect} color={outlineColor} direction="left" onMove={this.props.moveRect} /> :
-            null}
-            {isFocused ?
-            <Snap frame={rightSnapFrame} textRect={textRect} color={outlineColor} direction="right" onMove={this.props.moveRect} /> :
-            null}
-            <Text 
-            draggable
-            text={text}
-            fontStyle={textAttrs.bold ? 'bold' : textAttrs.italic ? 'italic' : '' } 
-            fill={textAttrs.color}
-            fontSize={textAttrs.fontSize}
-            fontFamily={textAttrs.font}
-            frame={textRect} 
-            textAttrs={textAttrs} 
-            onUpdateRect={this.props.moveRect}
-            onDragEnd={this.props.changeSize}
-            onDragStart={this.props.changeSize}
-            />
-            {isFocused ?
-            <Line width={2} frame={textRect} color={outlineColor} /> :
-            null}
-            {cursorCoords && isEditing ?
-            <Cursor coords={cursorCoords} /> :
-            null}
-            {isEditing ? selectionRects : null}
-            </Group>;
+        return (
+            <React.Fragment>
+                <Text 
+                    draggable
+                    text={this.state.text}
+                    fontStyle={textAttrs.bold ? 'bold' : textAttrs.italic ? 'italic' : '' } 
+                    fill={textAttrs.color}
+                    fontSize={textAttrs.fontSize}
+                    fontFamily={textAttrs.font}
+                    frame={textRect} 
+                    x={this.state.x} 
+                    y={this.state.y}
+                    textAttrs={textAttrs} 
+                    onDblClick={this.handleTextDblClick}
+                    onDragEnd={this.props.changeSize}
+                    onDragStart={this.props.changeSize}
+                />
+                <Portal>
+                    <textarea
+                        value={this.state.text}
+                        style={{
+                            display: this.state.textEditVisible ? 'block' : 'none',
+                            position: 'absolute',
+                            top: this.state.textareaY + 'px',
+                            left: this.state.textareaX + 'px',
+                            background: 'transparent',
+                            color: 'transparent'
+                        }}
+                        onChange={this.handleTextEdit}
+                        onKeyDown={this.handleTextareaKeyDown}
+                    />
+                </Portal>
+            </React.Fragment>
+        );
     }
 }
