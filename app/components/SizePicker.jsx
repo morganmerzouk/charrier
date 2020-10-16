@@ -27,14 +27,14 @@ export default class extends React.Component {
         const {width, height, onWidthSelect, onHeightSelect} = this.props;
 
         return <div className="SizePicker">
-            <p>
+            <span className="dimension">
                 Largeur:
-                <input type="text" value={width} onChange={this.updateWidth} /><br />
-            </p>
-            <p>
+                <input type="number" maxLength="3" size="3" value={width} onChange={this.updateWidth} /><br />
+            </span>
+            <span className="dimension">
                 Hauteur:
-                <input type="text" value={height} onChange={this.updateHeight} />
-            </p>
+                <input type="number" maxLength="3" size="3" value={height} onChange={this.updateHeight} />
+            </span>
         </div>;
     }
 }

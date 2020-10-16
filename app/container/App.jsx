@@ -5,6 +5,7 @@ import {cacheDrawing, setText, setTextRect, setFocus, setEditing, setNoFocus, se
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 import ImageCanvas from 'components/ImageCanvas';
+import Card from 'components/Card';
 
 export class App extends React.Component {
   updateDrawnImage(data) {
@@ -19,24 +20,25 @@ export class App extends React.Component {
     return (
       <div className="Container">
         <LeftSidebar />
-        <div className="Main">
-          <h4 className="Main-subtitle">Rendu</h4>
-          <ImageCanvas
-            image={selectedUrl}
-            body={{
-              text, textAttrs, textRect
-            }}
-            width={width}
-            length={length}
-            isFocused={this.props.focused}
-            isEditing={this.props.editing}
-            onFocus={this.props.onFocus}
-            onEdit={this.props.onEdit}
-            onBlur={this.props.onBlur}
-            onCancelEdit={this.props.onCancelEdit}
-            onTextRectMove={this.props.onTextRectMove}
-            onChange={this.props.updateDrawnImage}
-            onTextChange={this.props.onTextChange} />
+        <div className="MainCol">
+        <Card title="Rendu">
+            <ImageCanvas
+              image={selectedUrl}
+              body={{
+                text, textAttrs, textRect
+              }}
+              width={width}
+              length={length}
+              isFocused={this.props.focused}
+              isEditing={this.props.editing}
+              onFocus={this.props.onFocus}
+              onEdit={this.props.onEdit}
+              onBlur={this.props.onBlur}
+              onCancelEdit={this.props.onCancelEdit}
+              onTextRectMove={this.props.onTextRectMove}
+              onChange={this.props.updateDrawnImage}
+              onTextChange={this.props.onTextChange} />
+        </Card>
         </div>
         <RightSidebar />
       </div>

@@ -20,11 +20,13 @@ export default class extends React.Component {
           {this.props.images.map(image => {
             const sel = image.url === selected.url;
             const className = 'ImagePicker-image' + (sel ? ' ImagePicker-image--selected' : '');
-            const imageUrl = image.url + "&w=364";
+            const imageUrl = image.url;
+            const label = image.label;
 
-            return <div className={className} onClick={this.handleSelect.bind(this, image)} key={image.url}>
+            return <div className={className} onClick={this.handleSelect.bind(this, image)} key={imageUrl}>
               <Option selected={sel} borderStyle="thick-transparent">
-                  <img src={imageUrl} crossOrigin="anonymous" / >
+                  <img src={imageUrl} / >
+                  <p className="label">{label}</p>
               </Option>
             </div>;
           })}

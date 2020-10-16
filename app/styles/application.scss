@@ -26,9 +26,15 @@ body {
   padding-top: 15px;
 }
 
+.label {
+    margin: 0; 
+    text-align: center;
+}
+
 .Main {
   flex: 0 0 530px;
   padding: 15px;
+  margin: 15px 0;
   background: #fff;
   border: 1px solid $dark-grey-color;
   border-top: none;
@@ -45,6 +51,16 @@ body {
     letter-spacing: 0.5px;
     font-size: 13px;
   }
+}
+
+.MainCol {
+  padding-top: 15px;
+  min-width: 500px;
+}
+
+.dimension input {
+  width: 100px;
+  margin-right: 20px;
 }
 
 .Card {
@@ -101,7 +117,6 @@ body {
   canvas {
     display: block;
     margin: 0 auto;
-    border-radius: 3px;
   }
 }
 
@@ -117,7 +132,6 @@ body {
 }
 
 .ImagePicker {
-  overflow-y: scroll;
   height: calc(100vh - 74px - 32px);
   padding-top: 4px;
 

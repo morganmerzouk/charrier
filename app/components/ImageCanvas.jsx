@@ -1,19 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {connect} from 'react-redux';
-import { Stage, Layer, Line, Image, Transformer } from 'react-konva';
+import { Stage, Layer, Line, Image, Group, Rect, Transformer } from 'react-konva';
 import Spinner from './Spinner';
 import TextBox from './TextBox';
+import TransformerComponent from './TransformerComponent';
 import computeDimensions from './computeImageDimensions';
 import useImage from 'use-image';
 import Portal from './Portal';
+import Card from 'components/Card';
 
 const MyImage = (image) => {
     const [images] = useImage(image.image);
     return <Image image={images} crossOrigin="Anonymous" />;
 };
 
-class URLImage extends React.Component {
+class LogoImage extends React.Component {
     state = {
         image: null,
         width: null,
@@ -22,22 +24,16 @@ class URLImage extends React.Component {
     
     componentDidMount() {
         this.loadImage();
-        this.trRef.current.nodes([this.shapeRef.current]);
-        this.trRef.current.getLayer().batchDraw();
     }
     
     componentDidUpdate(oldProps) {
         if (oldProps.src !== this.props.src) {
             this.loadImage();
-            this.trRef.current.nodes([this.shapeRef.current]);
-            this.trRef.current.getLayer().batchDraw();
         }
     }
 
     constructor(props) {
         super(props);
-        this.shapeRef = React.createRef();
-        this.trRef = React.createRef();
     }
     
     componentWillUnmount() {
@@ -70,46 +66,45 @@ class URLImage extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <Image
-                    ref={this.shapeRef}
-                    x={this.props.x}
-                    y={this.props.y}
-                    width={this.state.width}
-                    height={this.state.height}
-                    draggable
-                    image={this.state.image}
-                    onTransformEnd={(e) => {
-                        // transformer is changing scale of the node
-                        // and NOT its width or height
-                        // but in the store we have only width and height
-                        // to match the data better we will reset scale on transform end
-                        const node = this.shapeRef.current;
-                        const scaleX = node.scaleX();
-                        const scaleY = node.scaleY();
-
-                        // we will reset it back
-                        node.scaleX(1);
-                        node.scaleY(1);
-                        this.onChange({
-                            x: node.x(),
-                            y: node.y(),
-                            // set minimal value
-                            width: Math.max(5, node.width() * scaleX),
-                            height: Math.max(node.height() * scaleY),
-                        });
-                    }}
+              <Group
+                name="group2"
+                x={100}
+                y={100}
+                draggable
+              >
+                <Rect
+                  name="rect2"
                 />
+                    <Image
+                        name="image"
+                        ref={this.shapeRef}
+                        x={this.props.x}
+                        y={this.props.y}
+                        width={this.state.width}
+                        height={this.state.height}
+                        image={this.state.image}
+                        onTransformEnd={(e) => {
+                            // transformer is changing scale of the node
+                            // and NOT its width or height
+                            // but in the store we have only width and height
+                            // to match the data better we will reset scale on transform end
+                            const node = this.shapeRef.current;
+                            const scaleX = node.scaleX();
+                            const scaleY = node.scaleY();
 
-                <Transformer
-                    ref={this.trRef}
-                    boundBoxFunc={(oldBox, newBox) => {
-                        // limit resize
-                        if (newBox.width < 5 || newBox.height < 5) {
-                          return oldBox;
-                        }
-                        return newBox;
-                      }}
-                />
+                            // we will reset it back
+                            node.scaleX(1);
+                            node.scaleY(1);
+                            this.onChange({
+                                x: node.x(),
+                                y: node.y(),
+                                // set minimal value
+                                width: Math.max(5, node.width() * scaleX),
+                                height: Math.max(node.height() * scaleY),
+                            });
+                        }}
+                    />
+                </Group>
             </React.Fragment>
         );
     }
@@ -119,7 +114,8 @@ class ImageCanvas extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            text: props.body.text
+            text: props.body.text,
+            selectedShapeName: ""
         };
     }
     handleTextEdit = e => {
@@ -134,6 +130,33 @@ class ImageCanvas extends React.Component {
             });
         }
     }
+  handleStageMouseDown = (e) => {
+    // clicked on stage - cler selection
+    if (e.target === e.target.getStage()) {
+      this.setState({
+        selectedShapeName: ""
+      });
+      return;
+    }
+    // clicked on transformer - do nothing
+    const clickedOnTransformer = e.target.getParent().className === "Transformer";
+    if (clickedOnTransformer) {
+      return;
+    }
+
+    // find clicked rect by its name
+    const name = e.target.name();
+    // const rect = this.state.rectangles.find(r => r.name === name);
+    if (name) {
+      this.setState({
+        selectedShapeName: name
+      });
+    } else {
+      this.setState({
+        selectedShapeName: ""
+      });
+    }
+  };
 
     render() {
         const logoUrl = this.props.logo;
@@ -146,7 +169,8 @@ class ImageCanvas extends React.Component {
         const {image} = this.props;
         
         return <div className="ImageCanvas" id="canvas" crossOrigin="Anonymous">
-                    <Stage width={canvasWidth} height={canvasHeight} crossOrigin="Anonymous">
+                    <Stage width={canvasWidth} height={canvasHeight} style={{overflow: "auto"}} 
+        onMouseDown={this.handleStageMouseDown} crossOrigin="Anonymous">
                         <Layer crossOrigin="Anonymous">
                             <MyImage image={image} onMouseDown={this.handleClickOnImage} crossOrigin="Anonymous" />
                             <TextBox
@@ -154,13 +178,21 @@ class ImageCanvas extends React.Component {
                               textAttrs={this.props.body.textAttrs}
                               text={this.state.text}
                             />
-                            <URLImage 
+                            <LogoImage 
                                 src={logoUrl} 
-                                x={150} 
-                                y={150}
+                                x={0} 
+                                y={0}
                             />
+                              <TransformerComponent
+                                selectedShapeName={this.state.selectedShapeName}
+                              />
                         </Layer>
                     </Stage>
+                    <p>
+                    <div className="Card-header">
+                        <h4>Texte</h4>
+                    </div>
+                    </p>
                     <textarea
                         value={this.state.text}
                         onChange={this.handleTextEdit}

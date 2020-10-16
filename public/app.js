@@ -74706,11 +74706,9 @@ var _default = /*#__PURE__*/function (_React$Component) {
       dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
       /* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
 
-      dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
-      this.href = dt;
-      var uri = this.props.drawing;
+      dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=rendu.png');
       var link = e.target;
-      link.href = uri;
+      link.href = dt;
       link.click();
     }
   }, {
@@ -74718,7 +74716,7 @@ var _default = /*#__PURE__*/function (_React$Component) {
     value: function render() {
       return /*#__PURE__*/_react["default"].createElement("div", null, /*#__PURE__*/_react["default"].createElement("a", {
         className: "Button",
-        download: "test.jpg",
+        download: "rendu.png",
         target: "_blank",
         onClick: this.handleDownload.bind(this)
       }, "T\xE9l\xE9charger"));
@@ -74755,11 +74753,15 @@ var _Spinner = _interopRequireDefault(require("./Spinner"));
 
 var _TextBox = _interopRequireDefault(require("./TextBox"));
 
+var _TransformerComponent = _interopRequireDefault(require("./TransformerComponent"));
+
 var _computeImageDimensions = _interopRequireDefault(require("./computeImageDimensions"));
 
 var _useImage3 = _interopRequireDefault(require("use-image"));
 
 var _Portal = _interopRequireDefault(require("./Portal"));
+
+var _Card = _interopRequireDefault(require("components/Card"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -74810,33 +74812,29 @@ var MyImage = function MyImage(image) {
   });
 };
 
-var URLImage = /*#__PURE__*/function (_React$Component) {
-  _inherits(URLImage, _React$Component);
+var LogoImage = /*#__PURE__*/function (_React$Component) {
+  _inherits(LogoImage, _React$Component);
 
-  var _super = _createSuper(URLImage);
+  var _super = _createSuper(LogoImage);
 
-  _createClass(URLImage, [{
+  _createClass(LogoImage, [{
     key: "componentDidMount",
     value: function componentDidMount() {
       this.loadImage();
-      this.trRef.current.nodes([this.shapeRef.current]);
-      this.trRef.current.getLayer().batchDraw();
     }
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(oldProps) {
       if (oldProps.src !== this.props.src) {
         this.loadImage();
-        this.trRef.current.nodes([this.shapeRef.current]);
-        this.trRef.current.getLayer().batchDraw();
       }
     }
   }]);
 
-  function URLImage(props) {
+  function LogoImage(props) {
     var _this;
 
-    _classCallCheck(this, URLImage);
+    _classCallCheck(this, LogoImage);
 
     _this = _super.call(this, props);
 
@@ -74864,12 +74862,10 @@ var URLImage = /*#__PURE__*/function (_React$Component) {
       _this.handleLoad();
     });
 
-    _this.shapeRef = /*#__PURE__*/_react["default"].createRef();
-    _this.trRef = /*#__PURE__*/_react["default"].createRef();
     return _this;
   }
 
-  _createClass(URLImage, [{
+  _createClass(LogoImage, [{
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
       this.image.removeEventListener('load', this.handleLoad);
@@ -74890,13 +74886,20 @@ var URLImage = /*#__PURE__*/function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      return /*#__PURE__*/_react["default"].createElement(_react["default"].Fragment, null, /*#__PURE__*/_react["default"].createElement(_reactKonva.Image, {
+      return /*#__PURE__*/_react["default"].createElement(_react["default"].Fragment, null, /*#__PURE__*/_react["default"].createElement(_reactKonva.Group, {
+        name: "group2",
+        x: 100,
+        y: 100,
+        draggable: true
+      }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Rect, {
+        name: "rect2"
+      }), /*#__PURE__*/_react["default"].createElement(_reactKonva.Image, {
+        name: "image",
         ref: this.shapeRef,
         x: this.props.x,
         y: this.props.y,
         width: this.state.width,
         height: this.state.height,
-        draggable: true,
         image: this.state.image,
         onTransformEnd: function onTransformEnd(e) {
           // transformer is changing scale of the node
@@ -74918,21 +74921,11 @@ var URLImage = /*#__PURE__*/function (_React$Component) {
             height: Math.max(node.height() * scaleY)
           });
         }
-      }), /*#__PURE__*/_react["default"].createElement(_reactKonva.Transformer, {
-        ref: this.trRef,
-        boundBoxFunc: function boundBoxFunc(oldBox, newBox) {
-          // limit resize
-          if (newBox.width < 5 || newBox.height < 5) {
-            return oldBox;
-          }
-
-          return newBox;
-        }
-      }));
+      })));
     }
   }]);
 
-  return URLImage;
+  return LogoImage;
 }(_react["default"].Component);
 
 var ImageCanvas = /*#__PURE__*/function (_React$Component2) {
@@ -74961,8 +74954,40 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component2) {
       }
     });
 
+    _defineProperty(_assertThisInitialized(_this3), "handleStageMouseDown", function (e) {
+      // clicked on stage - cler selection
+      if (e.target === e.target.getStage()) {
+        _this3.setState({
+          selectedShapeName: ""
+        });
+
+        return;
+      } // clicked on transformer - do nothing
+
+
+      var clickedOnTransformer = e.target.getParent().className === "Transformer";
+
+      if (clickedOnTransformer) {
+        return;
+      } // find clicked rect by its name
+
+
+      var name = e.target.name(); // const rect = this.state.rectangles.find(r => r.name === name);
+
+      if (name) {
+        _this3.setState({
+          selectedShapeName: name
+        });
+      } else {
+        _this3.setState({
+          selectedShapeName: ""
+        });
+      }
+    });
+
     _this3.state = {
-      text: props.body.text
+      text: props.body.text,
+      selectedShapeName: ""
     };
     return _this3;
   }
@@ -74989,6 +75014,10 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component2) {
       }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Stage, {
         width: canvasWidth,
         height: canvasHeight,
+        style: {
+          overflow: "auto"
+        },
+        onMouseDown: this.handleStageMouseDown,
         crossOrigin: "Anonymous"
       }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Layer, {
         crossOrigin: "Anonymous"
@@ -75000,11 +75029,15 @@ var ImageCanvas = /*#__PURE__*/function (_React$Component2) {
         ref: "bodyBox",
         textAttrs: this.props.body.textAttrs,
         text: this.state.text
-      }), /*#__PURE__*/_react["default"].createElement(URLImage, {
+      }), /*#__PURE__*/_react["default"].createElement(LogoImage, {
         src: logoUrl,
-        x: 150,
-        y: 150
-      }))), /*#__PURE__*/_react["default"].createElement("textarea", {
+        x: 0,
+        y: 0
+      }), /*#__PURE__*/_react["default"].createElement(_TransformerComponent["default"], {
+        selectedShapeName: this.state.selectedShapeName
+      }))), /*#__PURE__*/_react["default"].createElement("p", null, /*#__PURE__*/_react["default"].createElement("div", {
+        className: "Card-header"
+      }, /*#__PURE__*/_react["default"].createElement("h4", null, "Texte"))), /*#__PURE__*/_react["default"].createElement("textarea", {
         value: this.state.text,
         onChange: this.handleTextEdit,
         onKeyDown: this.handleTextareaKeyDown,
@@ -75104,18 +75137,20 @@ var _default = /*#__PURE__*/function (_React$Component) {
       }, this.props.images.map(function (image) {
         var sel = image.url === selected.url;
         var className = 'ImagePicker-image' + (sel ? ' ImagePicker-image--selected' : '');
-        var imageUrl = image.url + "&w=364";
+        var imageUrl = image.url;
+        var label = image.label;
         return /*#__PURE__*/_react["default"].createElement("div", {
           className: className,
           onClick: _this.handleSelect.bind(_this, image),
-          key: image.url
+          key: imageUrl
         }, /*#__PURE__*/_react["default"].createElement(_Option["default"], {
           selected: sel,
           borderStyle: "thick-transparent"
         }, /*#__PURE__*/_react["default"].createElement("img", {
-          src: imageUrl,
-          crossOrigin: "anonymous"
-        })));
+          src: imageUrl
+        }), /*#__PURE__*/_react["default"].createElement("p", {
+          className: "label"
+        }, label)));
       }));
     }
   }]);
@@ -75346,12 +75381,20 @@ var _default = /*#__PURE__*/function (_React$Component) {
           onHeightSelect = _this$props.onHeightSelect;
       return /*#__PURE__*/_react["default"].createElement("div", {
         className: "SizePicker"
-      }, /*#__PURE__*/_react["default"].createElement("p", null, "Largeur:", /*#__PURE__*/_react["default"].createElement("input", {
-        type: "text",
+      }, /*#__PURE__*/_react["default"].createElement("span", {
+        className: "dimension"
+      }, "Largeur:", /*#__PURE__*/_react["default"].createElement("input", {
+        type: "number",
+        maxLength: "3",
+        size: "3",
         value: width,
         onChange: this.updateWidth
-      }), /*#__PURE__*/_react["default"].createElement("br", null)), /*#__PURE__*/_react["default"].createElement("p", null, "Hauteur:", /*#__PURE__*/_react["default"].createElement("input", {
-        type: "text",
+      }), /*#__PURE__*/_react["default"].createElement("br", null)), /*#__PURE__*/_react["default"].createElement("span", {
+        className: "dimension"
+      }, "Hauteur:", /*#__PURE__*/_react["default"].createElement("input", {
+        type: "number",
+        maxLength: "3",
+        size: "3",
         value: height,
         onChange: this.updateHeight
       })));
@@ -75406,6 +75449,8 @@ var _reactKonva = require("react-konva");
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
+var _reactDom = require("react-dom");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -75437,20 +75482,6 @@ var _default = /*#__PURE__*/function (_React$Component) {
 
   var _super = _createSuper(_default);
 
-  _createClass(_default, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.trRef.current.nodes([this.shapeRef.current]);
-      this.trRef.current.getLayer().batchDraw();
-    }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate() {
-      this.trRef.current.nodes([this.shapeRef.current]);
-      this.trRef.current.getLayer().batchDraw();
-    }
-  }]);
-
   function _default(props) {
     var _this;
 
@@ -75458,19 +75489,10 @@ var _default = /*#__PURE__*/function (_React$Component) {
 
     _this = _super.call(this, props);
 
-    _defineProperty(_assertThisInitialized(_this), "handleTextDblClick", function (e) {
-      var canvasCoords = document.getElementsByTagName("canvas")[0].getBoundingClientRect();
-      var absPos = e.target.getAbsolutePosition();
-
-      _this.setState({
-        textEditVisible: true,
-        textareaX: canvasCoords.x + absPos.x,
-        textareaY: canvasCoords.y + absPos.y
-      });
+    _defineProperty(_assertThisInitialized(_this), "state", {
+      selectedShapeName: ""
     });
 
-    _this.shapeRef = /*#__PURE__*/_react["default"].createRef();
-    _this.trRef = /*#__PURE__*/_react["default"].createRef();
     _this.state = {
       textEditVisible: false,
       text: props.text,
@@ -75483,56 +75505,23 @@ var _default = /*#__PURE__*/function (_React$Component) {
   _createClass(_default, [{
     key: "render",
     value: function render() {
-      var _this2 = this;
-
-      var _this$props = this.props,
-          textAttrs = _this$props.textAttrs,
-          textRect = _this$props.textRect;
-      return /*#__PURE__*/_react["default"].createElement(_react["default"].Fragment, null, /*#__PURE__*/_react["default"].createElement(_reactKonva.Text, {
-        draggable: true,
-        ref: this.shapeRef,
+      var textAttrs = this.props.textAttrs;
+      return /*#__PURE__*/_react["default"].createElement(_react["default"].Fragment, null, /*#__PURE__*/_react["default"].createElement(_reactKonva.Group, {
+        name: "group",
+        x: 100,
+        y: 100,
+        draggable: true
+      }, /*#__PURE__*/_react["default"].createElement(_reactKonva.Rect, {
+        name: "rect"
+      }), /*#__PURE__*/_react["default"].createElement(_reactKonva.Text, {
+        name: "text",
         text: this.props.text,
         fontStyle: textAttrs.bold ? 'bold' : textAttrs.italic ? 'italic' : '',
         fill: textAttrs.color,
         fontSize: textAttrs.fontSize,
         fontFamily: textAttrs.font,
-        frame: textRect,
-        x: textAttrs.x,
-        y: textAttrs.y,
-        textAttrs: textAttrs,
-        onDblClick: this.handleTextDblClick,
-        onDragEnd: this.props.changeSize,
-        onDragStart: this.props.changeSize,
-        onTransformEnd: function onTransformEnd(e) {
-          // transformer is changing scale of the node
-          // and NOT its width or height
-          // but in the store we have only width and height
-          // to match the data better we will reset scale on transform end
-          var node = _this2.shapeRef.current;
-          var scaleX = node.scaleX();
-          var scaleY = node.scaleY(); // we will reset it back
-
-          node.scaleX(1);
-          node.scaleY(1);
-          onChange({
-            x: node.x(),
-            y: node.y(),
-            // set minimal value
-            width: Math.max(5, node.width() * scaleX),
-            height: Math.max(node.height() * scaleY)
-          });
-        }
-      }), /*#__PURE__*/_react["default"].createElement(_reactKonva.Transformer, {
-        ref: this.trRef,
-        boundBoxFunc: function boundBoxFunc(oldBox, newBox) {
-          // limit resize
-          if (newBox.width < 5 || newBox.height < 5) {
-            return oldBox;
-          }
-
-          return newBox;
-        }
-      }));
+        padding: 5
+      })));
     }
   }]);
 
@@ -75712,6 +75701,132 @@ _defineProperty(_default, "propTypes", {
 });
 });
 
+;require.register("components/TransformerComponent.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactKonva = require("react-konva");
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
+var _reactDom = require("react-dom");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var TransformerComponent = /*#__PURE__*/function (_React$Component) {
+  _inherits(TransformerComponent, _React$Component);
+
+  var _super = _createSuper(TransformerComponent);
+
+  function TransformerComponent() {
+    _classCallCheck(this, TransformerComponent);
+
+    return _super.apply(this, arguments);
+  }
+
+  _createClass(TransformerComponent, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.checkNode();
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      this.checkNode();
+    }
+  }, {
+    key: "onTransformStart",
+    value: function onTransformStart() {
+      console.log('onTransformStart');
+    }
+  }, {
+    key: "onTransform",
+    value: function onTransform() {
+      console.log('onTransform');
+    }
+  }, {
+    key: "onTransformEnd",
+    value: function onTransformEnd() {
+      console.log('end transform');
+    }
+  }, {
+    key: "checkNode",
+    value: function checkNode() {
+      // here we need to manually attach or detach Transformer node
+      var stage = this.transformer.getStage();
+      var selectedShapeName = this.props.selectedShapeName;
+      var selectedNode = stage.findOne("." + selectedShapeName); // do nothing if selected node is already attached
+
+      if (selectedNode === this.transformer.node()) {
+        return;
+      }
+
+      if (selectedNode) {
+        var type = selectedNode.getType();
+
+        if (type != "Group") {
+          selectedNode = selectedNode.findAncestor("Group");
+        } // attach to another node
+
+
+        this.transformer.attachTo(selectedNode);
+      } else {
+        // remove transformer
+        this.transformer.detach();
+      }
+
+      this.transformer.getLayer().batchDraw();
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this = this;
+
+      return /*#__PURE__*/_react["default"].createElement(_reactKonva.Transformer, {
+        ref: function ref(node) {
+          _this.transformer = node;
+        },
+        transformstart: this.onTransformStart,
+        transform: this.onTransform,
+        transformend: this.onTransformEnd
+      });
+    }
+  }]);
+
+  return TransformerComponent;
+}(_react["default"].Component);
+
+exports["default"] = TransformerComponent;
+});
+
 ;require.register("components/Upload.jsx", function(exports, require, module) {
 "use strict";
 
@@ -75830,7 +75945,6 @@ var _default = function _default(Component) {
         height = _ref.height,
         rest = _objectWithoutProperties(_ref, ["width", "height"]);
 
-    console.log(height);
     var canvasWidth = width,
         canvasHeight = height;
     return /*#__PURE__*/_react["default"].createElement(Component, _extends({}, rest, {
@@ -75862,6 +75976,8 @@ var _LeftSidebar = _interopRequireDefault(require("./LeftSidebar"));
 var _RightSidebar = _interopRequireDefault(require("./RightSidebar"));
 
 var _ImageCanvas = _interopRequireDefault(require("components/ImageCanvas"));
+
+var _Card = _interopRequireDefault(require("components/Card"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -75917,10 +76033,10 @@ var App = /*#__PURE__*/function (_React$Component) {
       return /*#__PURE__*/_react["default"].createElement("div", {
         className: "Container"
       }, /*#__PURE__*/_react["default"].createElement(_LeftSidebar["default"], null), /*#__PURE__*/_react["default"].createElement("div", {
-        className: "Main"
-      }, /*#__PURE__*/_react["default"].createElement("h4", {
-        className: "Main-subtitle"
-      }, "Rendu"), /*#__PURE__*/_react["default"].createElement(_ImageCanvas["default"], {
+        className: "MainCol"
+      }, /*#__PURE__*/_react["default"].createElement(_Card["default"], {
+        title: "Rendu"
+      }, /*#__PURE__*/_react["default"].createElement(_ImageCanvas["default"], {
         image: selectedUrl,
         body: {
           text: text,
@@ -75938,7 +76054,7 @@ var App = /*#__PURE__*/function (_React$Component) {
         onTextRectMove: this.props.onTextRectMove,
         onChange: this.props.updateDrawnImage,
         onTextChange: this.props.onTextChange
-      })), /*#__PURE__*/_react["default"].createElement(_RightSidebar["default"], null));
+      }))), /*#__PURE__*/_react["default"].createElement(_RightSidebar["default"], null));
     }
   }]);
 
@@ -76020,7 +76136,7 @@ var LeftSidebar = function LeftSidebar(_ref) {
   return /*#__PURE__*/_react["default"].createElement("div", {
     className: "Sidebar"
   }, /*#__PURE__*/_react["default"].createElement(_Card["default"], {
-    title: "Images"
+    title: "Texture"
   }, /*#__PURE__*/_react["default"].createElement(_ImagePicker["default"], {
     images: availableImages,
     selected: selectedImage,
@@ -76217,7 +76333,7 @@ var initialState = {
   logo: null,
   drawing: null,
   width: 500,
-  height: 500,
+  height: 300,
   text: 'Exemple de texte',
   textRect: [20, 20, 500 - 40, 500 - 40],
   textAttrs: {
@@ -76227,8 +76343,8 @@ var initialState = {
     bold: false,
     italic: false,
     lineHeight: 1.35,
-    x: 150,
-    y: 200
+    x: 120,
+    y: 130
   },
   focused: false,
   editing: false
@@ -76494,11 +76610,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getPopularImages = void 0;
 var images = [{
-  url: 'https://images.unsplash.com/photo-1461016951828-c09537329b3a?fm=jpg'
+  url: 'images/bois.jpg',
+  label: 'Bois'
 }, {
-  url: 'https://images.unsplash.com/photo-1461295025362-7547f63dbaea?fm=jpg'
+  url: 'images/cuir.jpg',
+  label: 'Cuir'
 }, {
-  url: 'https://images.unsplash.com/photo-1465326117523-6450112b60b2?fm=jpg'
+  url: 'images/acier.jpg',
+  label: 'Acier'
 }];
 
 var getPopularImages = function getPopularImages() {

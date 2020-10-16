@@ -8,7 +8,7 @@ const initialState = {
   logo: null,
   drawing: null,
   width: 500,
-  height: 500,
+  height: 300,
   text: 'Exemple de texte',
   textRect: [20, 20, 500 - 40, 500 - 40],
   textAttrs: {
@@ -18,8 +18,8 @@ const initialState = {
     bold: false,
     italic: false,
     lineHeight: 1.35,
-    x: 150,
-    y: 200,
+    x: 120,
+    y: 130,
   },
   focused: false,
   editing: false

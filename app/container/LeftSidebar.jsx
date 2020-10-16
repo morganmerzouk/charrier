@@ -6,7 +6,7 @@ import ImagePicker from 'components/ImagePicker';
 
 const LeftSidebar = ({ query, availableImages, selectedImage, onSelectImage}) => {
   return <div className="Sidebar">
-    <Card title="Images">
+    <Card title="Texture">
       <ImagePicker
         images={availableImages}
         selected={selectedImage}

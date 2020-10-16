@@ -13,6 +13,8 @@ export default class extends React.Component {
 
   handleDownload(e) {
 
+    
+
     var canvas = document.getElementsByTagName("canvas")[0];
     var ctx = canvas.getContext("2d");
     
@@ -21,19 +23,16 @@ export default class extends React.Component {
     dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
 
     /* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
-    dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
+    dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=rendu.png');
 
-    this.href = dt;
-
-    const uri = this.props.drawing;
     const link = e.target;
-    link.href = uri;
+    link.href = dt;
     link.click();
   }
 
   render() {
     return <div>
-        <a className="Button" download="test.jpg" target="_blank" onClick={this.handleDownload.bind(this)}>Télécharger</a>
+        <a className="Button" download="rendu.png" target="_blank" onClick={this.handleDownload.bind(this)}>Télécharger</a>
     </div>;
   }
 }
